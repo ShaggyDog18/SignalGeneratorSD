@@ -1,5 +1,4 @@
 # SignalGeneratorSD (SD mod) based on AD9833 Module
-===
 
 Author: Cezar Chirila
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
