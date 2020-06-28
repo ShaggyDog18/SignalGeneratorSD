@@ -450,20 +450,20 @@ void menuProcessing( void ) {
 }// menuProcessing
 
 
-void setCursor2enterPosition( uint8_t cursotPosition ){
+void setCursor2enterPosition( uint8_t cursorPosition ){
 static uint8_t lastCursorPos = 0;
   // Move the cursor position in case it changed
-  if(lastCursorPos != cursotPosition) {
+  if(lastCursorPos != cursorPosition) {
     unsigned char realPosR = 0;
     unsigned char realPosC;
-    if (settingInputPos[cursotPosition] < LCD_DISP_COLS) {
-      realPosC = settingInputPos[cursotPosition];
+    if (settingInputPos[cursorPosition] < LCD_DISP_COLS) {
+      realPosC = settingInputPos[cursorPosition];
     } else {
-      realPosC = settingInputPos[cursotPosition] - LCD_DISP_COLS;
+      realPosC = settingInputPos[cursorPosition] - LCD_DISP_COLS;
       realPosR = 1;
     }
     lcd.setCursor(realPosC, realPosR);
-    lastCursorPos = cursotPosition;
+    lastCursorPos = cursorPosition;
     lcd.cursor();
   }
 }
@@ -611,8 +611,8 @@ void displayMode( outmode_t _currentMode ) {
   lcd.print(mode[(uint8_t)_currentMode ]);
 #endif
   if( menuState == SETTING_MENU ) {
-    lcd.cursor();
     lcd.noBlink();
+    lcd.cursor();
   }
 }
 
