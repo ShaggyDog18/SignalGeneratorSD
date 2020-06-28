@@ -1,13 +1,13 @@
-# SignalGeneratorSD
-
- SignalGeneratorSD based on AD9833 ModuleSignal Generator (SD mod) based on AD9833 Module
+# SignalGeneratorSD (SD mod) based on AD9833 Module
 ===
 
 Author: Cezar Chirila
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
-Re-coded/improved by ShaggyDog18@gmail.com
+Re-coded/Improved by: ShaggyDog18@gmail.com
+
 JUNE 2020
+
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
 License: GNU GPLv3: https://choosealicense.com/licenses/gpl-3.0/
