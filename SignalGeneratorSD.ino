@@ -37,7 +37,7 @@ At first start EEPROM: RC Error will be shown. Will automatically reset settings
 
 ## Navigation:
 
-- Single button click at the default screen -> go to SETTING_MODE.
+- Single button click at the default screen -> go to SETTING_MENU.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Encoder rotation at input frequency -> change value of the current digit (underlined by a cursor) of the frequency value.
 - Single button click at active input parameter -> change parameter value. The new value is immediately applied.
@@ -111,7 +111,7 @@ GButton buttOK( BUTTON_OK );
 // Define data types
 enum menuState_t : uint8_t {
   DEFAULT_SCREEN = 0,
-  SETTING_MODE,
+  SETTING_MENU,
   FREQUENCY_SETTING, 
 #ifdef USE_PHASE  
   PHASE_SETTING,
@@ -197,9 +197,6 @@ const uint8_t triangle[3][8] = {
 
 
 void setup() {
-  // Define Encoder button
-  // pinMode(BUTTON_OK, INPUT_PULLUP);
-  
   // Initialise the LCD, start the backlight and print a "bootup" message for two seconds
   lcd.begin();
   lcd.backlight();
@@ -297,7 +294,6 @@ void setup() {
 //---------------------------
 
 
-
 // ISR routine for Encoder
 void encoderTickISR( void ){
   encoder.tick(); 
@@ -305,14 +301,14 @@ void encoderTickISR( void ){
 
 
 void loop() {
-  buttOK.tick();   // Check to see if encoder button has been pressed
-  if( buttOK.isSingle() ) buttonPressed = true;
-  if( buttOK.isHolded() ) buttonLongPress = true;
+  buttOK.tick();   // Check if encoder button has been pressed
+  if( buttOK.isSingle() ) buttonPressed = true;   // single click
+  if( buttOK.isHolded() ) buttonLongPress = true; // long press
   
   #ifdef ENABLE_EEPROM
-    if( buttOK.isDouble() ) { // write settings to EEPROM
+    if( buttOK.isDouble() ) { // double click -> write settings to EEPROM
       writeSettingsToEEPROM();
-      blinkDisplayBacklight(2);
+      blinkDisplayBacklight(2); // double blink to confirm operation of writing to EEPROM
     }
   #endif
   
@@ -358,7 +354,7 @@ void menuProcessing( void ) {
         if( buttonPressed ) jump2settingMenu();
         break;
 
-    case SETTING_MODE: {    // Settings mode
+    case SETTING_MENU: {    // Settings mode
         if( buttonPressed ) { // If the setting in Power just toggle between on and off
           switch( cursorInputPos ) {
           case IP_FREQUENCY: // go to frequesncy setting
@@ -416,20 +412,14 @@ void menuProcessing( void ) {
           } else {
             digitPos = 0;
             setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-            menuState = SETTING_MODE;
-            cursorInputPos = IP_FREQUENCY;
-            lcd.setCursor(0,0);
-            lcd.cursor();
+            jump2settingMenu();
             break;
           }
           //lcd.setCursor(9 - digitPos, 0);
         } else if( buttonLongPress ) {
           //digitPos = 0;  // preserve last digit input position
           setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-          menuState = SETTING_MODE;
-          cursorInputPos = IP_FREQUENCY;
-          lcd.setCursor(0,0);
-          lcd.cursor();
+          jump2settingMenu();
           break;
         }
         // Set the blinking cursor on the digit you can currently modify
@@ -455,10 +445,6 @@ void menuProcessing( void ) {
         lcd.setCursor(5 - digitPos, 1);
       break;      
 #endif
-    
-    default: // Just in case we messed something up
-      menuState = DEFAULT_SCREEN;
-      defaultScreenFirstPass = true;
   }// switch( menuState )
   //lcd.cursor(); 
 }// menuProcessing
@@ -495,7 +481,7 @@ void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
           jump2settingMenu();
           break;
           
-      case SETTING_MODE: 
+      case SETTING_MENU: 
           cursorInputPos++;
           #ifdef ENABLE_VOUT_SWITCH
             if( settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
@@ -541,7 +527,7 @@ void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
     case RotaryEncoder::Direction::COUNTERCLOCKWISE:
     case RotaryEncoder::Direction::FAST_CCW:
       switch( menuState ) {
-      case SETTING_MODE:
+      case SETTING_MENU:
           if( cursorInputPos == IP_FREQUENCY )
             cursorInputPos = NUMBER_INPUT_POSITIONS-1;
           else {
@@ -588,7 +574,7 @@ void jump2settingMenu( void ) {
   lcd.noBlink();
   lcd.setCursor(0, 0);
   lcd.cursor();
-  menuState = SETTING_MODE;
+  menuState = SETTING_MENU;
   cursorInputPos = IP_FREQUENCY;
 }
 
@@ -624,7 +610,7 @@ void displayMode( outmode_t _currentMode ) {
 #else
   lcd.print(mode[(uint8_t)_currentMode ]);
 #endif
-  if( menuState == SETTING_MODE ) {
+  if( menuState == SETTING_MENU ) {
     lcd.cursor();
     lcd.noBlink();
   }
