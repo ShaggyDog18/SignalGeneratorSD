@@ -4,7 +4,7 @@ URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-ana
 
 Re-coded by ShaggyDog18@gmail.com
 JUNE 2020
-github: 
+github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
 License: GNU GPLv3: https://choosealicense.com/licenses/gpl-3.0/
 
