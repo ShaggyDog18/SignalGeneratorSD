@@ -346,7 +346,7 @@ void loop() {
     #ifdef USE_PHASE
       displayPhase( phase );
     #else
-      displaycurrentChannel( settings.currentChannel );
+      displayCurrentChannel( settings.currentChannel );
     #endif
     
     #ifdef ENABLE_VOUT_SWITCH
@@ -354,9 +354,7 @@ void loop() {
     #endif
     
     displayMode( settings.currentMode[(uint8_t)settings.currentChannel] );
-    
     setCursor2inputPosition( cursorInputPos );
-    
     updateDisplay = false;
   }
 } // End loop()
@@ -416,7 +414,6 @@ void menuProcessing( void ) {
           } // switch( cursorInputPos )
           updateDisplay = true; 
         }
-        setCursor2inputPosition( cursorInputPos );
       } 
       break;
 
@@ -489,20 +486,18 @@ void processingLongPress( void ) {
 		break;
 
 	case SETTING_MENU:
-      menuState = DEFAULT_SCREEN;
-      defaultScreenFirstPass = true;
-      cursorInputPos = IP_FREQUENCY;
-		  setCursor2inputPosition( cursorInputPos );
+    menuState = DEFAULT_SCREEN;
+    defaultScreenFirstPass = true;
+    cursorInputPos = IP_FREQUENCY;
 		break;
 
 #ifdef  USE_PHASE // never tested
     case PHASE_SETTING: 
 #endif
 	case FREQUENCY_SETTING: 
-      //digitPos = 0;  // preserve last digit input position
-      setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-      jump2settingMenu();
-      break;
+    setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
+    jump2settingMenu();
+    break;
   } // switch( menuState )
 } //  processingLongPress(void)
 
@@ -614,11 +609,11 @@ void processingEncoder( RotaryEncoder::Direction rotaryDirection ) {
 
 
 void jump2settingMenu( void ) {
+  menuState = SETTING_MENU;
+  cursorInputPos = IP_FREQUENCY;
   lcd.noBlink();
   lcd.setCursor(0, 0);
   lcd.cursor();
-  menuState = SETTING_MENU;
-  cursorInputPos = IP_FREQUENCY;
 }
 
 // Function to display the current frequency in the top left corner
@@ -676,7 +671,7 @@ void displayPhase( unsigned int phaseToDisplay ) {
 
 // Function to display the FREQ register (either 0 or 1) in the bottom left
 // corner
-void displaycurrentChannel( bool _channel ) {
+void displayCurrentChannel( bool _channel ) {
   lcd.setCursor(0, 1);
   lcd.print(F("CHAN"));
   lcd.print((uint8_t)_channel);
