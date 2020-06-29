@@ -20,7 +20,14 @@ License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 - Slightly changed navigation (see below)
 - use EEPROM to store and recover settings
 
+## Hardware
+
+- Any ATMega328P or 168P chip based board (UNO, Nano, Pro Mini)
+- AD9833 Module
+
 ## Libraries:
+
+Download and install all below libraries as regular libraries in your Arduino IDE:
 
 - RotaryEncoder, modified: https://github.com/ShaggyDog18/RotaryEncoder
 - MD_A9833, modified:  https://github.com/ShaggyDog18/MD_AD9833
@@ -52,5 +59,16 @@ At the first start EEPROM: CRC Error will be shown. Will automatically reset set
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
 - Double click anywhere -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
 
+## Known Feature
 
+AD98333 module generates meandre (square signal) at its VCC level. So, if VCC bus is +5V, then amplitude of the square sugnal is 5V. 
+In some cases a signal of 3.3v may be required. 
+There are several solution:
+1. use 3.3v power bus for entire solutoin.
+2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
+3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
+So, I deployed option 3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
+To activate the feature uncomment: **#define ENABLE_VOUT_SWITCH**
+
+Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
