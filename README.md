@@ -69,6 +69,8 @@ There are several solution:
 3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
 So, I deployed option 3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
-To activate the feature uncomment: **#define ENABLE_VOUT_SWITCH**
+To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
+
+**Note:** The switch may be also a simple mechanical 2-position toggle switch!
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
