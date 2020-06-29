@@ -1,4 +1,4 @@
-/*=================== Signal Generator-SD mod- based on AD9833 Module
+/*=================== Signal Generator -SD mod- based on AD9833 Module
 Author: Cezar Chirila
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
@@ -321,6 +321,7 @@ void encoderTickISR( void ){
 
 void loop() {
   buttOK.tick();   // Check if encoder button has been pressed
+  // process button clicks
   if( buttOK.isSingle() ) processSingleClick(); // single click
   if( buttOK.isHolded() ) processLongPress();   // long press
   #ifdef ENABLE_EEPROM
@@ -329,7 +330,7 @@ void loop() {
       blinkDisplayBacklight(2); // double blink to confirm operation of writing to EEPROM
     }
   #endif
-  
+
   processEncoder( encoder.getDirection() );  
   menuProcessing();
 
@@ -367,10 +368,17 @@ void menuProcessing( void ) {
       break;
 
     case FREQUENCY_SETTING:    // Frequency setting
+      // Set the blinking cursor on the digit you can currently modify
       lcd.setCursor(9 - digitPos, 0);
       break;
-  }// switch( menuState )
-}// menuProcessing
+
+#ifdef  USE_PHASE // never tested
+    case PHASE_SETTING:    // Phase setting
+      lcd.setCursor(5 - digitPos, 1);
+      break;
+#endif      
+  } // switch( menuState )
+} // menuProcessing()
 
 
 void processSingleClick(void){
@@ -430,39 +438,63 @@ void processSingleClick(void){
         digitPos = 0;
         setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
         jump2settingMenu();
-        // break;
       }        
-      // Set the blinking cursor on the digit you can currently modify
-      // lcd.setCursor(9 - digitPos, 0);
       break;
         
 #ifdef  USE_PHASE // never tested
     case PHASE_SETTING:    // Phase setting
-          if (digitPos < 3) { 
-            digitPos++;
-          } else {
-            digitPos = 0;
-            menuState = DEFAULT_SCREEN;
-            defaultScreenFirstPass = true;
-            #ifdef USE_MD_LIB
-              sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
-            #else
-              sigGen.setPhase(phase);
-            #endif
-          }
-        lcd.setCursor(5 - digitPos, 1);
+      if (digitPos < 3) { 
+        digitPos++;
+      } else {
+        digitPos = 0;
+        #ifdef USE_MD_LIB
+          sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
+        #else
+          sigGen.setPhase(phase);
+        #endif
+        jump2settingMenu();
+      }
       break;      
 #endif    
-// under construction
-  }
-}
+  }  // switch( menuState )
+}  // processSingleClick(void)
 
 
-void setCursor2inputPosition( uint8_t cursorPosition ){
+void processLongPress( void ) {
+  switch( menuState ) {
+  case DEFAULT_SCREEN: 
+    // do nothing
+    break;
+
+  case SETTING_MENU:
+    menuState = DEFAULT_SCREEN;
+    cursorInputPos = IP_FREQUENCY;
+    defaultScreenFirstPass = true;
+    break;
+
+#ifdef  USE_PHASE // never tested
+  case PHASE_SETTING: 
+    // setPhase here
+    #ifdef USE_MD_LIB
+      sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
+    #else
+      sigGen.setPhase(phase);
+    #endif
+    jump2settingMenu();
+    break;
+#endif
+
+  case FREQUENCY_SETTING: 
+    setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
+    jump2settingMenu();
+    break;
+  } // switch( menuState )
+} //  processingLongPress(void)
+
+
+void setCursor2inputPosition( uint8_t cursorPosition ) {
 static uint8_t lastCursorPos = 0;
-  // Move the cursor position in case it changed
-  //if(lastCursorPos != cursorPosition) 
-  {
+  // Move the cursor to display position in case it changed
     unsigned char realPosR = 0;
     unsigned char realPosC;
     if (settingInputPos[cursorPosition] < LCD_DISP_COLS) {
@@ -474,37 +506,12 @@ static uint8_t lastCursorPos = 0;
     lastCursorPos = cursorPosition;
     lcd.setCursor(realPosC, realPosR);
     lcd.cursor();
-  }
-}
-
-
-void processLongPress( void ) {
-  switch( menuState ) {
-  case DEFAULT_SCREEN: 
-    // do nothing
-    break;
-
-  case SETTING_MENU:
-    menuState = DEFAULT_SCREEN;
-    defaultScreenFirstPass = true;
-    cursorInputPos = IP_FREQUENCY;
-    break;
-
-#ifdef  USE_PHASE // never tested
-  case PHASE_SETTING: 
-#endif
-  case FREQUENCY_SETTING: 
-    setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-    jump2settingMenu();
-    break;
-  } // switch( menuState )
-} //  processingLongPress(void)
+} // setCursor2inputPosition()
 
 
 void processEncoder( RotaryEncoder::Direction rotaryDirection ) {
-  // Depending in which menu state you are
-  // the encoder will either change the value of a setting:
-  //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
+  // Depending in which menu state you are the encoder will either change the value of a setting:
+  //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), 
   // or it will change the cursor position
   switch( rotaryDirection ) {
   case RotaryEncoder::Direction::CLOCKWISE:
@@ -554,7 +561,7 @@ void processEncoder( RotaryEncoder::Direction rotaryDirection ) {
           }
         } break;
 #endif        
-      }
+      }  // switch( menuState )
       break;
 
     case RotaryEncoder::Direction::COUNTERCLOCKWISE:
@@ -588,7 +595,6 @@ void processEncoder( RotaryEncoder::Direction rotaryDirection ) {
           // value (upto 4096)
           // A better implementation would be to use increment of pi/4 or submultiples of
           // pi where 2pi = 4096
-
           unsigned long newPhase = phase + power(10, digitPos);
           unsigned char dispDigit = phase % power(10, digitPos + 1) / power(10, digitPos);
           if (newPhase > 0 && dispDigit > 0) {
@@ -597,9 +603,9 @@ void processEncoder( RotaryEncoder::Direction rotaryDirection ) {
           }
         } break;
 #endif        
-      }
+      }  // switch( menuState )
       break;
-    }
+    }  // switch( rotaryDirection )
 }  // processingEncoder()
 
 
@@ -609,7 +615,8 @@ void jump2settingMenu( void ) {
   lcd.noBlink();
   lcd.setCursor(0, 0);
   lcd.cursor();
-}
+} // jump2settingMenu()
+
 
 // Function to display the current frequency in the top left corner
 void displayFrequency( unsigned long frequencyToDisplay ) {
@@ -621,7 +628,7 @@ void displayFrequency( unsigned long frequencyToDisplay ) {
     frequencyToDisplay -= dispDigit * power(10, i);
   }
   lcd.print(F("Hz"));
-}
+} // displayFrequency()
 
 
 // Function to display power state (ON/OFF) in the top right corner
@@ -643,11 +650,7 @@ void displayMode( outmode_t _currentMode ) {
 #else
   lcd.print(mode[(uint8_t)_currentMode ]);
 #endif
-  if( menuState == SETTING_MENU ) {
-    lcd.noBlink();
-    lcd.cursor();
-  }
-}
+} // displayMode()
 
 
 // Function to display the mode in the bottom left corner
@@ -661,7 +664,7 @@ void displayPhase( unsigned int phaseToDisplay ) {
     lcd.print(dispDigit);
     phaseToDisplay -= dispDigit * power(10, i);
   }
-}
+} // displayPhase()
 
 
 // Function to display the FREQ register (either 0 or 1) in the bottom left
@@ -670,7 +673,7 @@ void displayCurrentChannel( bool _channel ) {
   lcd.setCursor(0, 1);
   lcd.print(F("CHAN"));
   lcd.print((uint8_t)_channel);
-}
+} // displayCurrentChannel()
 
 
 void displayCLKoutVolt( bool _toggleCLKoutVolt, outmode_t _currentMode ) {
@@ -681,7 +684,7 @@ void displayCLKoutVolt( bool _toggleCLKoutVolt, outmode_t _currentMode ) {
   } else {
     lcd.print( F("     ") );
   }
-}
+} // displayCLKoutVolt()
 
 void toggleCLKvolt( bool _toggleOutVolt ) {
  digitalWrite( TOGGLE_CLK_VOUT, _toggleOutVolt ? HIGH : LOW ); // HIGH = 5v, 3.3v
@@ -709,11 +712,11 @@ void setADmode( outmode_t _currentMode ) {
   case OUTMODE_TRIANGLE:sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
   case OUTMODE_MEANDRE: sigGen.setModeSD( MD_AD9833::MODE_SQUARE1 ); break;
   }
-}
+} // setADmode()
 
 void setADfrequency( bool _channel, unsigned long _frequency ) {
   sigGen.setFrequency( _channel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, _frequency );
-}
+} // setADfrequency()
 
 void setADchannel( bool _channel ) {
   if( _channel ) {
@@ -725,18 +728,18 @@ void setADchannel( bool _channel ) {
     frequency = settings.frequency[0];
     //frequency = sigGen.getFrequency(  MD_AD9833::CHAN_0 );
   }
-}
+} // setADchannel()
 
 #else // old error-fixed library
 
 void setADmode( outmode_t _currentMode ) {
   sigGen.mode( _currentMode );
-}
+} // setADmode()
 
 void setADfrequency(  bool _channel, unsigned long _frequency ) {
   sigGen.setFPRegister((uint8_t) _channel );
   sigGen.setFreq( _frequency );
-}
+} // setADfrequency()
 
 void setADchannel( bool _channel ) {
   if( _channel ) {
@@ -746,7 +749,7 @@ void setADchannel( bool _channel ) {
     sigGen.setFPRegister(0);
     frequency = settings.frequency[0];
   }
-}
+} // setADchannel()
 #endif
 
 
@@ -755,17 +758,16 @@ void blinkDisplayBacklight( uint8_t nBlinks ) {
     lcd.noBacklight(); _delay_ms(300);
     lcd.backlight();   _delay_ms(300);
   }
-}
+} // blinkDisplayBacklight()
 
 
 void applyCurrentSettings(void) {
   setADfrequency( 0, settings.frequency[0] );
   setADfrequency( 1, settings.frequency[1] );
-  
   // set current mode
   setADmode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
   setADchannel( settings.currentChannel );
-}
+} // applyCurrentSettings()
 
 
 #ifdef ENABLE_EEPROM
@@ -773,26 +775,30 @@ void applyCurrentSettings(void) {
 bool readSettingsFromEEPROM( void ) { // read settings from EEPROM; return true if CRC check sum is OK
   eeprom_read_block( (void *)&settings, ADDRESS_SHIFT, sizeof(settings_t) );  //eeprom_read_block (void *__dst, const void *__src, size_t __n);
   // check the CRC8 chech sum of the memory block read from EEPROM
-  uint8_t checkSum = crc8checkSum( (uint8_t *) &settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
+  uint8_t checkSum = crc8array( (uint8_t *) &settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
   if( checkSum == settings.checkSum ) return true;
   return false;
-}
+} // readSettingsFromEEPROM()
+
 
 void writeSettingsToEEPROM( void ) { // write settings to EEPROM
   // calculate the CRC8 chech sum of settings structure and write it to EEPROM along with settings
-  uint8_t checkSum = crc8checkSum( (uint8_t *)&settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
+  uint8_t checkSum = crc8array( (uint8_t *)&settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
   settings.checkSum = checkSum;
   eeprom_update_block( (void *)&settings, ADDRESS_SHIFT, sizeof(settings_t) );   // write settings to EEPROM: eeprom_update_block(const void *__src, void *__dst, size_t __n)
-}
+} // writeSettingsToEEPROM()
 
-uint8_t crc8checkSum( uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 check sum for the memory block
+
+uint8_t crc8array( uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 check sum for the memory block
   uint8_t checkSum = 0xFF;  // initial crc check sum value (see crc algorythm in Wikipedia)
-  
-  for( uint8_t i=0; i < dataSize-1; i++ ) {  // CRC8 for all bytes in the memory block
+
+  dataSize--; // decrease one time so that do not decrease it by 1 in the below for() checking the condition
+  for( uint8_t i=0; i < dataSize; i++ ) {  // CRC8 for all bytes in the memory block
     checkSum = crc8update( checkSum, data[i] );  
   }
   return checkSum;
-}
+} //crc8array
+
 
 uint8_t crc8update(uint8_t crc, uint8_t data) {  // standard calculation from Wikipedia
   crc ^= data;
@@ -802,6 +808,7 @@ uint8_t crc8update(uint8_t crc, uint8_t data) {  // standard calculation from Wi
 #endif
 
 
+// under development
 void toggleOut( outmode_t _currentMode ) {
   digitalWrite( TOGGLE_OUT, (_currentMode == OUTMODE_MEANDRE) ? HIGH : LOW );
   _delay_ms(100);
