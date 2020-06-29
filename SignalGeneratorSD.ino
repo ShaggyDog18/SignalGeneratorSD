@@ -307,8 +307,6 @@ void setup() {
 
   // Set Cursor to initial possition, reset the screen
   lcd.clear();
-  lcd.setCursor(0, 0);
-  lcd.blink();
 } // setup()
 //---------------------------
 
@@ -332,7 +330,6 @@ void loop() {
   #endif
 
   processEncoder( encoder.getDirection() );  
-  menuProcessing();
 
   if( updateDisplay ) {   // Update display if needed
     displayFrequency( frequency );
@@ -352,11 +349,13 @@ void loop() {
     setCursor2inputPosition( cursorInputPos );
     updateDisplay = false;
   }
+  menuPostProcessing();
+  
 } // End loop()
 //---------------------
 
 
-void menuProcessing( void ) {
+void menuPostProcessing(void) {
   switch( menuState ) {
     case DEFAULT_SCREEN:     // Default state
       if( defaultScreenFirstPass ) {
@@ -368,7 +367,7 @@ void menuProcessing( void ) {
       break;
 
     case FREQUENCY_SETTING:    // Frequency setting
-      // Set the blinking cursor on the digit you can currently modify
+      // Set the blinking cursor on the digit you currently modify
       lcd.setCursor(9 - digitPos, 0);
       break;
 
@@ -378,7 +377,7 @@ void menuProcessing( void ) {
       break;
 #endif      
   } // switch( menuState )
-} // menuProcessing()
+} // menuPostProcessing()
 
 
 void processSingleClick(void){
