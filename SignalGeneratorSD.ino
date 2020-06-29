@@ -2,11 +2,11 @@
 Author: Cezar Chirila
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
-Re-coded by ShaggyDog18@gmail.com
+Re-coded/Improved by: **ShaggyDog18@gmail.com**
 JUNE 2020
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
-License: GNU GPLv3: https://choosealicense.com/licenses/gpl-3.0/
+License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
 ## Change Log:
 
@@ -17,7 +17,14 @@ License: GNU GPLv3: https://choosealicense.com/licenses/gpl-3.0/
 - Slightly changed navigation (see below)
 - use EEPROM to store and recover settings
 
+## Hardware
+
+- Any ATMega328P or 168P chip based board (UNO, Nano, Pro Mini)
+- AD9833 Module
+
 ## Libraries:
+
+Download and install all below libraries as regular libraries in your Arduino IDE:
 
 - RotaryEncoder, modified: https://github.com/ShaggyDog18/RotaryEncoder
 - MD_A9833, modified:  https://github.com/ShaggyDog18/MD_AD9833
@@ -26,27 +33,44 @@ License: GNU GPLv3: https://choosealicense.com/licenses/gpl-3.0/
 
 ## Compile Options/Firmware Configuration:
 
-- #define USE_MD_LIB – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
-- #define GRAPH_ICONS - use graphical icons for signal representation on the display; Original Text labels can be used if commented
-- #define SWAP_ENCODER_DIRECTION  - swap encoder pins if encoder is detecting rotation incorrectly
-- #define ENABLE_EEPROM - save settings to EEPROM, recover them at startup  
-- #define LCD_I2C_ADDRESS 0x3f - may need to change I2C address of the display module
-- #define ENABLE_VOUT_SWITCH - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6
+- **#define USE_MD_LIB** – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
+- **#define GRAPH_ICONS** - use graphical icons for signal representation on the display; Original Text labels can be used if commented
+- **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
+- **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
+- **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
+- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
 
-At first start EEPROM: RC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
+At the first start EEPROM: CRC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
 
 ## Navigation:
 
-- Single button click at the default screen -> go to SETTING_MENU.
+- Single button click at the default screen -> go to SETTING_MODE.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Encoder rotation at input frequency -> change value of the current digit (underlined by a cursor) of the frequency value.
 - Single button click at active input parameter -> change parameter value. The new value is immediately applied.
 - Long button press anywhere in settings -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
 
-If EEPROM is enabled:
+### If EEPROM is enabled:
+
 - Press and hold button during start up -> reset settings to default (just for the current session, does not write default settings to EEPROM).
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
 - Double click anywhere -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
+
+## Known Feature
+
+AD98333 module generates meandre (square signal) at its VCC level. So, if VCC bus is +5V, then amplitude of the square sugnal is 5V. 
+In some cases a signal of 3.3v may be required. 
+There are several solution:
+1. use 3.3v power bus for entire solutoin.
+2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
+3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
+
+So, I deployed option 3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
+To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
+
+**Note:** The switch may be also a simple mechanical 2-position toggle switch!
+
+Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
 
 */
 // --- COMPILER CONFIG ----
@@ -153,7 +177,6 @@ const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting ins
 
 // button activity flags
 bool buttonPressed = false;
-bool buttonLongPress = false;
 
 // flags
 bool defaultScreenFirstPass = true;
@@ -289,7 +312,6 @@ void setup() {
   lcd.clear();
   lcd.setCursor(0, 0);
   lcd.blink();
-  //updateDisplay = true;
 } // setup()
 //---------------------------
 
@@ -302,8 +324,8 @@ void encoderTickISR( void ){
 
 void loop() {
   buttOK.tick();   // Check if encoder button has been pressed
-  if( buttOK.isSingle() ) buttonPressed = true;   // single click
-  if( buttOK.isHolded() ) buttonLongPress = true; // long press
+  if( buttOK.isSingle() ) {processingSingleClick(); buttonPressed = true;}  // single click
+  if( buttOK.isHolded() ) processingLongPress(); // long press
   
   #ifdef ENABLE_EEPROM
     if( buttOK.isDouble() ) { // double click -> write settings to EEPROM
@@ -312,16 +334,10 @@ void loop() {
     }
   #endif
   
-  // We are using the variable menuState to know where we are in the menu and
-  // what to do in case the button is pressed or increment/drecrement via the encoder
-  // Enter setting mode if the button has been pressed and display underline 
-  // cursor under input options (menuState 0)
-  // Pick a setting (menuState 1); Change that particular setting and save settings 
-
   menuProcessing();
-  buttonPressed = buttonLongPress = false;
+  buttonPressed =  false;
 
-  encoderProcessing( encoder.getDirection() );
+  processingEncoder( encoder.getDirection() );
 
   if( updateDisplay ) {   // Update display if needed
     displayFrequency( frequency );
@@ -332,10 +348,15 @@ void loop() {
     #else
       displaycurrentChannel( settings.currentChannel );
     #endif
+    
     #ifdef ENABLE_VOUT_SWITCH
       displayCLKoutVolt( settings.toggleCLKoutVolt, settings.currentMode[(uint8_t)settings.currentChannel] );
     #endif
+    
     displayMode( settings.currentMode[(uint8_t)settings.currentChannel] );
+    
+    setCursor2inputPosition( cursorInputPos );
+    
     updateDisplay = false;
   }
 } // End loop()
@@ -394,12 +415,8 @@ void menuProcessing( void ) {
             break;
           } // switch( cursorInputPos )
           updateDisplay = true; 
-        } else if( buttonLongPress ) {
-            menuState = DEFAULT_SCREEN;
-            defaultScreenFirstPass = true;
-            cursorInputPos = IP_FREQUENCY;
         }
-        setCursor2enterPosition( cursorInputPos );
+        setCursor2inputPosition( cursorInputPos );
       } 
       break;
 
@@ -416,11 +433,6 @@ void menuProcessing( void ) {
             break;
           }
           //lcd.setCursor(9 - digitPos, 0);
-        } else if( buttonLongPress ) {
-          //digitPos = 0;  // preserve last digit input position
-          setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-          jump2settingMenu();
-          break;
         }
         // Set the blinking cursor on the digit you can currently modify
         lcd.setCursor(9 - digitPos, 0);
@@ -450,10 +462,11 @@ void menuProcessing( void ) {
 }// menuProcessing
 
 
-void setCursor2enterPosition( uint8_t cursorPosition ){
+void setCursor2inputPosition( uint8_t cursorPosition ){
 static uint8_t lastCursorPos = 0;
   // Move the cursor position in case it changed
-  if(lastCursorPos != cursorPosition) {
+  //if(lastCursorPos != cursorPosition) 
+  {
     unsigned char realPosR = 0;
     unsigned char realPosC;
     if (settingInputPos[cursorPosition] < LCD_DISP_COLS) {
@@ -462,13 +475,43 @@ static uint8_t lastCursorPos = 0;
       realPosC = settingInputPos[cursorPosition] - LCD_DISP_COLS;
       realPosR = 1;
     }
-    lcd.setCursor(realPosC, realPosR);
     lastCursorPos = cursorPosition;
+    lcd.setCursor(realPosC, realPosR);
     lcd.cursor();
   }
 }
 
-void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
+
+void processingLongPress( void ) {
+  switch( menuState ) {
+	case DEFAULT_SCREEN: 
+		// do nothing
+		break;
+
+	case SETTING_MENU:
+      menuState = DEFAULT_SCREEN;
+      defaultScreenFirstPass = true;
+      cursorInputPos = IP_FREQUENCY;
+		  setCursor2inputPosition( cursorInputPos );
+		break;
+
+#ifdef  USE_PHASE // never tested
+    case PHASE_SETTING: 
+#endif
+	case FREQUENCY_SETTING: 
+      //digitPos = 0;  // preserve last digit input position
+      setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
+      jump2settingMenu();
+      break;
+  } // switch( menuState )
+} //  processingLongPress(void)
+
+
+void processingSingleClick(void){
+// under construction
+}
+
+void processingEncoder( RotaryEncoder::Direction rotaryDirection ) {
   // Depending in which menu state you are
   // the encoder will either change the value of a setting:
   //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
@@ -487,7 +530,7 @@ void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
             if( settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
           #endif
           if (cursorInputPos > NUMBER_INPUT_POSITIONS-1 ) cursorInputPos = IP_FREQUENCY;
-          setCursor2enterPosition( cursorInputPos );
+          setCursor2inputPosition( cursorInputPos );
           break;
 
       case FREQUENCY_SETTING:{
@@ -536,7 +579,7 @@ void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
               if( settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;
             #endif
           }  
-          setCursor2enterPosition( cursorInputPos );
+          setCursor2inputPosition( cursorInputPos );
           break;
 
       case FREQUENCY_SETTING: {
@@ -567,7 +610,7 @@ void encoderProcessing( RotaryEncoder::Direction rotaryDirection ) {
       }
       break;
     }
-}  // encoderProcessing()
+}  // processingEncoder()
 
 
 void jump2settingMenu( void ) {
