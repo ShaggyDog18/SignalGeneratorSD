@@ -175,9 +175,6 @@ int digitPos = 0;
 const unsigned long maxFrequency = 12500000; // according to AS9833 Datasheet the max frequency is 12.5 MHz
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
 
-// button activity flags
-bool buttonPressed = false;
-
 // flags
 bool defaultScreenFirstPass = true;
 bool updateDisplay = true;
@@ -324,9 +321,8 @@ void encoderTickISR( void ){
 
 void loop() {
   buttOK.tick();   // Check if encoder button has been pressed
-  if( buttOK.isSingle() ) {processingSingleClick(); buttonPressed = true;}  // single click
-  if( buttOK.isHolded() ) processingLongPress(); // long press
-  
+  if( buttOK.isSingle() ) processSingleClick(); // single click
+  if( buttOK.isHolded() ) processLongPress();   // long press
   #ifdef ENABLE_EEPROM
     if( buttOK.isDouble() ) { // double click -> write settings to EEPROM
       writeSettingsToEEPROM();
@@ -334,10 +330,8 @@ void loop() {
     }
   #endif
   
+  processEncoder( encoder.getDirection() );  
   menuProcessing();
-  buttonPressed =  false;
-
-  processingEncoder( encoder.getDirection() );
 
   if( updateDisplay ) {   // Update display if needed
     displayFrequency( frequency );
@@ -364,22 +358,34 @@ void loop() {
 void menuProcessing( void ) {
   switch( menuState ) {
     case DEFAULT_SCREEN:     // Default state
-        if( defaultScreenFirstPass ) {
-          lcd.setCursor(0, 0);
-          lcd.noCursor();
-          lcd.blink();
-          defaultScreenFirstPass = false;
-        }
-        if( buttonPressed ) jump2settingMenu();
-        break;
+      if( defaultScreenFirstPass ) {
+        lcd.setCursor(0, 0);
+        lcd.noCursor();
+        lcd.blink();
+        defaultScreenFirstPass = false;
+      }
+      break;
 
-    case SETTING_MENU: {    // Settings mode
-        if( buttonPressed ) { // If the setting in Power just toggle between on and off
-          switch( cursorInputPos ) {
+    case FREQUENCY_SETTING:    // Frequency setting
+      lcd.setCursor(9 - digitPos, 0);
+      break;
+  }// switch( menuState )
+}// menuProcessing
+
+
+void processSingleClick(void){
+  switch( menuState ) {
+    case DEFAULT_SCREEN:
+      jump2settingMenu();
+      break;
+      
+    case SETTING_MENU:
+      switch( cursorInputPos ) {
           case IP_FREQUENCY: // go to frequesncy setting
              menuState = FREQUENCY_SETTING; 
              lcd.cursor();
              break;
+             
           case IP_ONOFF: // switch an output generator signal on / off
             signalOn = ! signalOn;
             #ifdef USE_MD_LIB
@@ -411,33 +417,27 @@ void menuProcessing( void ) {
             toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );
             setADmode( settings.currentMode[(uint8_t)settings.currentChannel] );
             break;
-          } // switch( cursorInputPos )
-          updateDisplay = true; 
-        }
-      } 
+      } // switch( cursorInputPos )
+      updateDisplay = true;  
       break;
-
-    case FREQUENCY_SETTING:    // Frequency setting
-        // Each button press will either enable to change the value of another digit
-        // or if all digits have been changed, to apply the setting
-        if( buttonPressed ) {
-          if (digitPos < 7) {
-            digitPos++;
-          } else {
-            digitPos = 0;
-            setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-            jump2settingMenu();
-            break;
-          }
-          //lcd.setCursor(9 - digitPos, 0);
-        }
-        // Set the blinking cursor on the digit you can currently modify
-        lcd.setCursor(9 - digitPos, 0);
-        break;
+             
+    case FREQUENCY_SETTING:  
+      // Each button press will either enable to change the value of another digit
+      // or if all digits have been changed, to apply the setting
+      if (digitPos < 7) {
+        digitPos++;
+      } else {
+        digitPos = 0;
+        setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
+        jump2settingMenu();
+        // break;
+      }        
+      // Set the blinking cursor on the digit you can currently modify
+      // lcd.setCursor(9 - digitPos, 0);
+      break;
         
 #ifdef  USE_PHASE // never tested
     case PHASE_SETTING:    // Phase setting
-        if( buttonPressed ) {
           if (digitPos < 3) { 
             digitPos++;
           } else {
@@ -450,13 +450,12 @@ void menuProcessing( void ) {
               sigGen.setPhase(phase);
             #endif
           }
-        }
         lcd.setCursor(5 - digitPos, 1);
       break;      
-#endif
-  }// switch( menuState )
-  //lcd.cursor(); 
-}// menuProcessing
+#endif    
+// under construction
+  }
+}
 
 
 void setCursor2inputPosition( uint8_t cursorPosition ){
@@ -479,22 +478,22 @@ static uint8_t lastCursorPos = 0;
 }
 
 
-void processingLongPress( void ) {
+void processLongPress( void ) {
   switch( menuState ) {
-	case DEFAULT_SCREEN: 
-		// do nothing
-		break;
+  case DEFAULT_SCREEN: 
+    // do nothing
+    break;
 
-	case SETTING_MENU:
+  case SETTING_MENU:
     menuState = DEFAULT_SCREEN;
     defaultScreenFirstPass = true;
     cursorInputPos = IP_FREQUENCY;
-		break;
+    break;
 
 #ifdef  USE_PHASE // never tested
-    case PHASE_SETTING: 
+  case PHASE_SETTING: 
 #endif
-	case FREQUENCY_SETTING: 
+  case FREQUENCY_SETTING: 
     setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
     jump2settingMenu();
     break;
@@ -502,11 +501,7 @@ void processingLongPress( void ) {
 } //  processingLongPress(void)
 
 
-void processingSingleClick(void){
-// under construction
-}
-
-void processingEncoder( RotaryEncoder::Direction rotaryDirection ) {
+void processEncoder( RotaryEncoder::Direction rotaryDirection ) {
   // Depending in which menu state you are
   // the encoder will either change the value of a setting:
   //-+ frequency, change between FREQ0 and FREQ1 register (or -+ phase), On/Off, mode
