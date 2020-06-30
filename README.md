@@ -1,29 +1,29 @@
 # SignalGeneratorSD (SD mod) based on AD9833 Module
 
-Author: Cezar Chirila
-URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
-
-Re-coded/Improved by: **ShaggyDog18@gmail.com**
-
-JUNE 2020
+by **ShaggyDog18@gmail.com**, JUNE 2020
 
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
+
+Original firmware and hardware solution/schematic author: Cezar Chirila
+URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
 License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
 ## Change Log:
 
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button and, most important, for AD9833 module (I’ve never used a PHASE option... so, did not test it)
-- Added graphic icons for signal representation on the display
-- Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1
-- Tied a signal mode to CHANnel; so, now you may change signal form along with the frequency
-- Slightly changed navigation (see below)
-- use EEPROM to store and recover settings
+- Added graphic icons for signal representation on the display.
+- Slightly changed navigation (see Navigation section below).
+- Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
+- Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
+- Used EEPROM to store and recover settings.
+- Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
 
 ## Hardware
 
-- Any ATMega328P or 168P chip based board (UNO, Nano, Pro Mini)
-- AD9833 Module
+- Any ATMega328P or 168P chip based Arduino board (UNO, Nano, Pro Mini)
+- AD9833 Programmable Waveform Generator Module
+- Schmitt-trigger 74LVC1G14 (optional)
 
 ## Libraries:
 
@@ -42,6 +42,8 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
 - **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
 - **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
+- **#define ENABLE_MEANDRE05F_OUTMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
+    **Note:** Compatible with the new MD_AD9833 library only!
 
 At the first start EEPROM: CRC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
 
@@ -53,7 +55,7 @@ At the first start EEPROM: CRC Error will be shown. Will automatically reset set
 - Single button click at active input parameter -> change parameter value. The new value is immediately applied.
 - Long button press anywhere in settings -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
 
-### If EEPROM is enabled:
+#### If EEPROM is enabled:
 
 - Press and hold button during start up -> reset settings to default (just for the current session, does not write default settings to EEPROM).
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
@@ -68,9 +70,9 @@ There are several solution:
 2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
 3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
+**Note:** The switch may be also a simple mechanical 2-position toggle switch!
+
 So, I deployed option 3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
 To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
-
-**Note:** The switch may be also a simple mechanical 2-position toggle switch!
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
