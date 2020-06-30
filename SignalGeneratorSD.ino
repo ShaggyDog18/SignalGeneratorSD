@@ -83,7 +83,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
 #define ENABLE_MEANDRE05F_OUTMODE   // compatible with the new MD_AD9833 library only
-//#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
+#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
 //---------------- Config Checkup --------
@@ -203,21 +203,26 @@ uint8_t cursorInputPos = IP_FREQUENCY;
 
 #ifndef GRAPH_ICONS
 // LCD mode depicting constants
-const String mode[] = {"SIN", "TRI", "CLK", "C/2"};
+  #ifdef ENABLE_MEANDRE05F_OUTMODE
+    const String mode[] = {"SIN", "TRI", "CLK", "C/2"};
+  #else
+    const String mode[] = {"SIN", "TRI", "CLK"};
+  #endif
 #endif
 
 // Greek PHI symbol for phase shift
 // Only used if you enable PHASE setting instead of FREQ register
 #ifdef USE_PHASE
-const uint8_t phi[8] = {
+const uint8_t phi[] = {
 0b01110,0b00100,0b01110,0b10101,0b10101,0b01110,0b00100,0b01110 };
 #else
-const uint8_t ff[] = {
+const uint8_t ff[] = { // "FF" sign of indication of "OFF" state 
 0b11100,0b10000,0b11000,0b10111,0b00100,0b00110,0b00100,0b00000 };
+#define FF (lcd.write( 0 ))
 #endif
 
 #if defined( GRAPH_ICONS ) or defined( ENABLE_VOUT_SWITCH )
-const uint8_t meander[] = {
+const uint8_t meander[] = {  // meander sign _||_
 0b00000,0b01110,0b01010,0b01010,0b01010,0b01010,0b11011,0b00000 };
 #endif
 
@@ -238,7 +243,7 @@ const uint8_t triangle[3][8] = {
 void setup() {
   // Initialise the LCD, start the backlight and print a "bootup" message for two seconds
   lcd.begin();
-  lcd.backlight();
+  
 #ifdef USE_PHASE  
   lcd.createChar(0, phi ); // Custom PHI char for LCD
 #else
@@ -259,6 +264,7 @@ void setup() {
 
   // Launch Screen
   lcd.home();
+  lcd.backlight();
   lcd.print(F("Signal Generator"));
   lcd.setCursor(0, 1);
   lcd.print(F("-ShaggyDog 2020-"));
@@ -645,21 +651,21 @@ void jump2settingMenu(void) {
   menuState = SETTING_MENU;
   cursorInputPos = IP_FREQUENCY;
   lcd.noBlink();
-  lcd.setCursor(0, 0);
+  lcd.setCursor(0,0);
   lcd.cursor();
 } // jump2settingMenu()
 
 
 // Function to display the current frequency in the top left corner
 void displayFrequency( unsigned long _frequencyToDisplay ) {
-  lcd.setCursor(0, 0); 
+  lcd.setCursor(0,0); 
   lcd.print( F("f=") );
   for (int i = 7; i >= 0; i--) {
     unsigned char dispDigit = _frequencyToDisplay / power(10, i);
     lcd.print(dispDigit);
     _frequencyToDisplay -= dispDigit * power(10, i);
   }
-  lcd.print(F("Hz"));
+  lcd.print( F("Hz") );
 } // displayFrequency()
 
 
@@ -671,9 +677,9 @@ void displayPower( bool _signalOn ) {
   #else
     lcd.setCursor(14, 0);
     if( _signalOn )
-      lcd.print( F("ON ") );
+      lcd.print( F("ON") );
     else {
-      lcd.print( F("O") ); lcd.write( 0 ); //FF sign
+      lcd.print(F("O")); FF;   //lcd.write( 0 ); //FF sign
     }
   #endif
 }
@@ -684,12 +690,12 @@ void displayMode( outmode_t _currentMode ) {
   lcd.setCursor(13, 1);
 #ifdef GRAPH_ICONS
   switch( _currentMode ) {
-  case OUTMODE_SINE:      lcd.write( 2 );lcd.write( 3 );lcd.write( 4 );break;
-  case OUTMODE_TRIANGLE:  lcd.write( 5 );lcd.write( 6 );lcd.write( 7 );break;
-  case OUTMODE_MEANDRE:   lcd.write( 1 );lcd.write( 1 );lcd.write( 1 );break;
-#ifdef ENABLE_MEANDRE05F_OUTMODE
-  case OUTMODE_MEANDRE05F:lcd.write( 1 );lcd.print(F("/2"));break;
-#endif
+  case OUTMODE_SINE:     lcd.write( 2 );lcd.write( 3 );lcd.write( 4 );break;
+  case OUTMODE_TRIANGLE: lcd.write( 5 );lcd.write( 6 );lcd.write( 7 );break;
+  case OUTMODE_MEANDRE:  lcd.write( 1 );lcd.write( 1 );lcd.write( 1 );break;
+  #ifdef ENABLE_MEANDRE05F_OUTMODE
+    case OUTMODE_MEANDRE05F: lcd.write( 1 );lcd.print(F("/2"));break;
+  #endif
   }
 #else
   lcd.print(mode[(uint8_t)_currentMode ]);
@@ -702,7 +708,7 @@ void displayMode( outmode_t _currentMode ) {
 void displayPhase( unsigned int _phaseToDisplay ) {
   lcd.setCursor(0, 1);
   lcd.write(0);
-  lcd.print("=");
+  lcd.print( F("=") );
   for( int i = 3; i >= 0; i-- ) {
     unsigned int dispDigit = _phaseToDisplay / power(10, i);
     lcd.print(dispDigit);
@@ -715,7 +721,7 @@ void displayPhase( unsigned int _phaseToDisplay ) {
 // corner
 void displayCurrentChannel( bool _channel ) {
   lcd.setCursor(0, 1);
-  lcd.print(F("CHAN"));
+  lcd.print( F("CHAN") );
   lcd.print((uint8_t)_channel);
 } // displayCurrentChannel()
 
@@ -730,7 +736,7 @@ void displayCLKoutVolt( bool _toggleCLKoutVolt, outmode_t _currentMode ) {
     lcd.write( 1 );  // meandre sign
     lcd.print( _toggleCLKoutVolt ? F("5.0v") : F("3.3v") );
   } else {
-    lcd.print( F("     ") );
+    lcd.print( F("     ") ); // 5 x spaces
   }
 } // displayCLKoutVolt()
 
@@ -756,12 +762,12 @@ unsigned long power(int a, int b) {
 #ifdef USE_MD_LIB
 void setADmode( outmode_t _currentMode ) {
   switch( _currentMode ) {
-  case OUTMODE_SINE:    sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
-  case OUTMODE_TRIANGLE:sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
-  case OUTMODE_MEANDRE: sigGen.setModeSD( MD_AD9833::MODE_SQUARE1 ); break;
-#ifdef ENABLE_MEANDRE05F_OUTMODE
-  case OUTMODE_MEANDRE05F: sigGen.setModeSD( MD_AD9833::MODE_SQUARE2 ); break;
-#endif
+  case OUTMODE_SINE:     sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
+  case OUTMODE_TRIANGLE: sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
+  case OUTMODE_MEANDRE:  sigGen.setModeSD( MD_AD9833::MODE_SQUARE1 ); break;
+  #ifdef ENABLE_MEANDRE05F_OUTMODE
+    case OUTMODE_MEANDRE05F: sigGen.setModeSD( MD_AD9833::MODE_SQUARE2 ); break;
+  #endif
   }
 } // setADmode()
 
@@ -773,11 +779,10 @@ void setADchannel( bool _channel ) {
   if( _channel ) {
     sigGen.setActiveFrequency( MD_AD9833::CHAN_1 );
     frequency = settings.frequency[1];
-    //frequency = sigGen.getFrequency( MD_AD9833::CHAN_1 );
+    //frequency = sigGen.getFrequency( MD_AD9833::CHAN_1 );  // alternative way is to read frequency value from AD9833 module
   } else {
     sigGen.setActiveFrequency( MD_AD9833::CHAN_0 );
     frequency = settings.frequency[0];
-    //frequency = sigGen.getFrequency(  MD_AD9833::CHAN_0 );
   }
 } // setADchannel()
 

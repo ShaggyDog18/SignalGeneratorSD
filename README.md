@@ -4,7 +4,8 @@ by **ShaggyDog18@gmail.com**, JUNE 2020
 
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
-Original firmware and hardware solution/schematic author: Cezar Chirila
+Original firmware and hardware solution/schematic by: Cezar Chirila
+
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
 License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
@@ -43,7 +44,8 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
 - **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
 - **#define ENABLE_MEANDRE05F_OUTMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-    **Note:** Compatible with the new MD_AD9833 library only!
+	
+	**Note:** Compatible with the new MD_AD9833 library only!
 
 At the first start EEPROM: CRC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
 
