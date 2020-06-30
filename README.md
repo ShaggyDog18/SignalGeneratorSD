@@ -40,7 +40,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define USE_MD_LIB** – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - **#define GRAPH_ICONS** - use graphical icons for signal representation on the display; Original Text labels can be used if commented
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
-- **#define ENABLE_MEANDRE05F_OUTMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
+- **#define ENABLE_MEANDRE05F_SIGMODE** - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 	**Note:** Compatible with the new MD_AD9833 library only!
 - **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
 - **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly

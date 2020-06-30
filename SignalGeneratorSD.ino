@@ -39,7 +39,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define USE_MD_LIB** – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - **#define GRAPH_ICONS** - use graphical icons for signal representation on the display; Original Text labels can be used if commented
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
-- **#define ENABLE_MEANDRE05F_OUTMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
+- **#define ENABLE_MEANDRE05F_SIGMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
     **Note:** Compatible with the new MD_AD9833 library only!
 - **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
 - **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
@@ -83,13 +83,13 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define USE_MD_LIB      // new bug-free library
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
-#define ENABLE_MEANDRE05F_OUTMODE   // compatible with the new MD_AD9833 library only
+#define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only
 #define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
 //---------------- Config Checkup --------
 #ifndef USE_MD_LIB 
-  #undef ENABLE_MEANDRE05F_OUTMODE // compatible with the new MD_AD9833 library only
+  #undef ENABLE_MEANDRE05F_SIGMODE // compatible with the new MD_AD9833 library only
 #endif
 //----------------
 
@@ -128,7 +128,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 
 LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD Initialise
 RotaryEncoder encoder( DT, CLK );     // Initialise the encoder on pins 2 and 3 (interrupt pins)
-GButton buttOK( BUTTON_OK );
+GButton buttonOK( BUTTON_OK );
 
 #ifdef USE_MD_LIB
   MD_AD9833 sigGen( FSYNC_PIN );  // Hardware SPI
@@ -153,14 +153,14 @@ enum menuState_t : uint8_t {
 #endif
 } menuState = DEFAULT_SCREEN;
 
-enum outmode_t : uint8_t {
-  OUTMODE_SINE = 0,
-  OUTMODE_TRIANGLE,
-  OUTMODE_MEANDRE,
-#ifdef ENABLE_MEANDRE05F_OUTMODE
-  OUTMODE_MEANDRE05F,
+enum sigmode_t : uint8_t {
+  SIGMODE_SINE = 0,
+  SIGMODE_TRIANGLE,
+  SIGMODE_MEANDRE,
+#ifdef ENABLE_MEANDRE05F_SIGMODE
+  SIGMODE_MEANDRE05F,
 #endif
-  NUMBER_OUTMODES
+  NUMBER_SIGMODES
 };
 
 enum inputPositions_t : uint8_t {
@@ -176,20 +176,21 @@ enum inputPositions_t : uint8_t {
 
 struct settings_t {
   unsigned long frequency[2]; 
-  outmode_t currentMode[2]; // default value = OUTMODE_SINE
+  sigmode_t currentMode[2]; // default value = SIGMODE_SINE
   bool currentChannel;      // Default FREQ register/Channel#0 <> false); TRUE for FREQReg/Channel#1
   bool toggleCLKoutVolt;    // 3.3v CLK signal by default
   uint8_t checkSum;
 #ifdef ENABLE_EEPROM
   } settings;
 #else
-  } settings = { 1000UL, 1000UL, OUTMODE_SINE, OUTMODE_SINE, false, false, 0 }; // dafault values
+  } settings = { 1000UL, 1000UL, SIGMODE_SINE, SIGMODE_SINE, false, false, 0 }; // dafault values
 #endif
 
 int digitPos = 0;
 const unsigned long maxFrequency = 12500000; // according to AS9833 Datasheet the max frequency is 12.5 MHz
 #ifdef USE_PHASE
 const unsigned int maxPhase = 4095; // Only used if you enable PHASE setting instead of FREQ register
+uint16_t phase = 0;
 #endif
 
 // flags
@@ -199,12 +200,11 @@ bool signalOn = true;
 
 // Variables used to store phase, frequency
 unsigned long frequency = settings.frequency[0];
-uint16_t phase = 0; // Only used if you enable PHASE setting instead of FREQ register
 uint8_t cursorInputPos = IP_FREQUENCY;
 
 #ifndef GRAPH_ICONS
 // LCD mode depicting constants
-  #ifdef ENABLE_MEANDRE05F_OUTMODE
+  #ifdef ENABLE_MEANDRE05F_SIGMODE
     const String mode[] = {"SIN", "TRI", "CLK", "C/2"};
   #else
     const String mode[] = {"SIN", "TRI", "CLK"};
@@ -293,7 +293,7 @@ void setup() {
     lcd.setCursor(0, 0);
     lcd.print(F("Reset to default"));
     settings.frequency[0] = settings.frequency[1] = 1000UL;
-    settings.currentMode[0] = settings.currentMode[1] = OUTMODE_SINE;
+    settings.currentMode[0] = settings.currentMode[1] = SIGMODE_SINE;
     settings.toggleCLKoutVolt = false;
     settings.currentChannel = false; 
     blinkDisplayBacklight(3);
@@ -311,10 +311,10 @@ void setup() {
   sigGen.reset(1);
   sigGen.setFPRegister(0);
   sigGen.setFreq(settings.frequency[0]);
-  sigGen.setPhase(phase);
+  sigGen.setPhase(0);
   sigGen.setFPRegister(1);
   sigGen.setFreq(settings.frequency[1]);
-  sigGen.setPhase(phase);
+  sigGen.setPhase(0);
   // set current channel and mode
   sigGen.setFPRegister((uint8_t)settings.currentChannel);
   sigGen.mode( settings.currentMode[(uint8_t)settings.currentChannel] );
@@ -347,13 +347,13 @@ void encoderTickISR( void ){
 
 
 void loop() {
-  buttOK.tick();   // Check if encoder button has been pressed
+  buttonOK.tick();   // Check if encoder button has been pressed
   // process button clicks
-  if( buttOK.isSingle() ) processSingleClick(); // single click
-  if( buttOK.isHolded() ) processLongPress();   // long press
+  if( buttonOK.isSingle() ) processSingleClick(); // single click
+  if( buttonOK.isHolded() ) processLongPress();   // long press
   
   #ifdef ENABLE_EEPROM
-    if( buttOK.isDouble() ) { // double click -> write settings to EEPROM
+    if( buttonOK.isDouble() ) { // double click -> write settings to EEPROM
       writeSettingsToEEPROM();
       blinkDisplayBacklight(2); // double blink to confirm operation of writing to EEPROM
     }
@@ -437,7 +437,7 @@ void processSingleClick(void) {
           case IP_CHANNEL: // select channel 0 or 1
             settings.currentChannel = !settings.currentChannel; // flip bool value
             setADchannel( settings.currentChannel );
-            setADmode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
+            setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
             break;
 #endif
 
@@ -449,10 +449,10 @@ void processSingleClick(void) {
 #endif            
           case IP_MODE: // Change the mode (sine/triangle/clock)
             ++(*((uint8_t*)&(settings.currentMode[(uint8_t)settings.currentChannel])));  // increment currentMode value :-)
-            if( settings.currentMode[(uint8_t)settings.currentChannel] == NUMBER_OUTMODES ) settings.currentMode[(uint8_t)settings.currentChannel] = OUTMODE_SINE;
+            if( settings.currentMode[(uint8_t)settings.currentChannel] == NUMBER_SIGMODES ) settings.currentMode[(uint8_t)settings.currentChannel] = SIGMODE_SINE;
             // switch output to direct out
             toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );
-            setADmode( settings.currentMode[(uint8_t)settings.currentChannel] );
+            setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] );
             break;
       } // switch( cursorInputPos )
       updateDisplay = true;  
@@ -553,11 +553,11 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
       case SETTING_MENU: 
           cursorInputPos++;
           #ifdef ENABLE_VOUT_SWITCH
-          #ifdef ENABLE_MEANDRE05F_OUTMODE
-            if( (settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && 
-                 settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
+          #ifdef ENABLE_MEANDRE05F_SIGMODE
+            if( (settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && 
+                 settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
           #else
-            if( settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
+            if( settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
           #endif
           #endif
           if (cursorInputPos > NUMBER_INPUT_POSITIONS-1 ) cursorInputPos = IP_FREQUENCY;
@@ -607,11 +607,11 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
           else {
             cursorInputPos--;
             #ifdef ENABLE_VOUT_SWITCH
-            #ifdef ENABLE_MEANDRE05F_OUTMODE
-              if( (settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && 
-                   settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;
+            #ifdef ENABLE_MEANDRE05F_SIGMODE
+              if( (settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && 
+                   settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;
             #else
-              if( settings.currentMode[(uint8_t)settings.currentChannel] != OUTMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;
+              if( settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;
             #endif
             #endif
           }  
@@ -687,15 +687,15 @@ void displayPower( bool _signalOn ) {
 
 
 // Function to display the mode in the bottom right corner
-void displayMode( outmode_t _currentMode ) {
+void displayMode( sigmode_t _currentMode ) {
   lcd.setCursor(13, 1);
 #ifdef GRAPH_ICONS
   switch( _currentMode ) {
-  case OUTMODE_SINE:     lcd.write( 2 );lcd.write( 3 );lcd.write( 4 );break;
-  case OUTMODE_TRIANGLE: lcd.write( 5 );lcd.write( 6 );lcd.write( 7 );break;
-  case OUTMODE_MEANDRE:  lcd.write( 1 );lcd.write( 1 );lcd.write( 1 );break;
-  #ifdef ENABLE_MEANDRE05F_OUTMODE
-    case OUTMODE_MEANDRE05F: lcd.write( 1 );lcd.print(F("/2"));break;
+  case SIGMODE_SINE:     lcd.write( 2 );lcd.write( 3 );lcd.write( 4 );break;
+  case SIGMODE_TRIANGLE: lcd.write( 5 );lcd.write( 6 );lcd.write( 7 );break;
+  case SIGMODE_MEANDRE:  lcd.write( 1 );lcd.write( 1 );lcd.write( 1 );break;
+  #ifdef ENABLE_MEANDRE05F_SIGMODE
+    case SIGMODE_MEANDRE05F: lcd.write( 1 );lcd.print(F("/2"));break;
   #endif
   }
 #else
@@ -727,12 +727,12 @@ void displayCurrentChannel( bool _channel ) {
 } // displayCurrentChannel()
 
 
-void displayCLKoutVolt( bool _toggleCLKoutVolt, outmode_t _currentMode ) {
+void displayCLKoutVolt( bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
   lcd.setCursor(7, 1);
-#ifdef ENABLE_MEANDRE05F_OUTMODE
-  if( _currentMode == OUTMODE_MEANDRE || _currentMode == OUTMODE_MEANDRE05F ) {
+#ifdef ENABLE_MEANDRE05F_SIGMODE
+  if( _currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F ) {
 #else
-  if( _currentMode == OUTMODE_MEANDRE ) {
+  if( _currentMode == SIGMODE_MEANDRE ) {
 #endif
     lcd.write( 1 );  // meandre sign
     lcd.print( _toggleCLKoutVolt ? F("5.0v") : F("3.3v") );
@@ -761,16 +761,16 @@ unsigned long power(int a, int b) {
 
 
 #ifdef USE_MD_LIB
-void setADmode( outmode_t _currentMode ) {
+void setADsignalMode( sigmode_t _currentMode ) {
   switch( _currentMode ) {
-  case OUTMODE_SINE:     sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
-  case OUTMODE_TRIANGLE: sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
-  case OUTMODE_MEANDRE:  sigGen.setModeSD( MD_AD9833::MODE_SQUARE1 ); break;
-  #ifdef ENABLE_MEANDRE05F_OUTMODE
-    case OUTMODE_MEANDRE05F: sigGen.setModeSD( MD_AD9833::MODE_SQUARE2 ); break;
+  case SIGMODE_SINE:     sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
+  case SIGMODE_TRIANGLE: sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
+  case SIGMODE_MEANDRE:  sigGen.setModeSD( MD_AD9833::MODE_SQUARE1 ); break;
+  #ifdef ENABLE_MEANDRE05F_SIGMODE
+    case SIGMODE_MEANDRE05F: sigGen.setModeSD( MD_AD9833::MODE_SQUARE2 ); break;
   #endif
   }
-} // setADmode()
+} // setADsignalMode()
 
 void setADfrequency( bool _channel, unsigned long _frequency ) {
   sigGen.setFrequency( _channel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, _frequency );
@@ -789,9 +789,9 @@ void setADchannel( bool _channel ) {
 
 #else // old error-fixed library
 
-void setADmode( outmode_t _currentMode ) {
+void setADsignalMode( sigmode_t _currentMode ) {
   sigGen.mode( _currentMode );
-} // setADmode()
+} // setADsignalMode()
 
 void setADfrequency(  bool _channel, unsigned long _frequency ) {
   sigGen.setFPRegister((uint8_t) _channel );
@@ -822,7 +822,7 @@ void applyCurrentSettings(void) {
   setADfrequency( 0, settings.frequency[0] );
   setADfrequency( 1, settings.frequency[1] );
   // set current mode
-  setADmode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
+  setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
   setADchannel( settings.currentChannel );
 } // applyCurrentSettings()
 
@@ -866,11 +866,11 @@ uint8_t crc8update( uint8_t crc, uint8_t data ) {  // standard calculation from 
 
 
 // under development
-void toggleOut( outmode_t _currentMode ) {
-#ifdef ENABLE_MEANDRE05F_OUTMODE
-  digitalWrite( TOGGLE_OUT, (_currentMode == OUTMODE_MEANDRE || _currentMode == OUTMODE_MEANDRE05F) ? HIGH : LOW );
+void toggleOut( sigmode_t _currentMode ) {
+#ifdef ENABLE_MEANDRE05F_SIGMODE
+  digitalWrite( TOGGLE_OUT, (_currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F) ? HIGH : LOW );
 #else
-  digitalWrite( TOGGLE_OUT, (_currentMode == OUTMODE_MEANDRE) ? HIGH : LOW );
+  digitalWrite( TOGGLE_OUT, (_currentMode == SIGMODE_MEANDRE) ? HIGH : LOW );
 #endif
   _delay_ms(100);
 }
