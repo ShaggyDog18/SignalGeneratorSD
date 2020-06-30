@@ -29,21 +29,22 @@ License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
 Download and install all below libraries as regular libraries in your Arduino IDE:
 
+- MD_A9833, modified:  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF feature)
 - RotaryEncoder, modified: https://github.com/ShaggyDog18/RotaryEncoder
-- MD_A9833, modified:  https://github.com/ShaggyDog18/MD_AD9833
 - GyverButton: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
-- LCD I2C display (standard): https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
+- LCD1602 I2C display: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 
 ## Compile Options/Firmware Configuration:
 
 - **#define USE_MD_LIB** – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - **#define GRAPH_ICONS** - use graphical icons for signal representation on the display; Original Text labels can be used if commented
-- **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
-- **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
-- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
 - **#define ENABLE_MEANDRE05F_OUTMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-**Note:** Compatible with the new MD_AD9833 library only!
+    **Note:** Compatible with the new MD_AD9833 library only!
+- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
+- **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
+- **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
+- **#define USE_PHASE** - use Phase instead of the FREQ register; never use nor tested
 
 At the first start EEPROM: CRC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
 
@@ -70,7 +71,7 @@ There are several solution:
 2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
 3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
-So, I deployed option 3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
+So, I deployed the option#3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
 To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
 
 **Note:** The switch may be also a simple mechanical 2-position toggle switch!
