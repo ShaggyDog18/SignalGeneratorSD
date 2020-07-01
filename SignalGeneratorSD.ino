@@ -122,7 +122,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define FSYNC_PIN  10
 
 // LCD Settings
-#define LCD_I2C_ADDRESS 0x3f
+#define LCD_I2C_ADDRESS 0x3f	// 0x27 - alternative i2c address
 #define LCD_DISP_COLS   16
 #define LCD_DISP_ROWS   2
 
@@ -133,7 +133,7 @@ GButton buttonOK( BUTTON_OK );
 #ifdef USE_MD_LIB
   MD_AD9833 sigGen( FSYNC_PIN );  // Hardware SPI
 #else  
-  AD9833 sigGen( FSYNC_PIN, 25000000 ); // Initialise our AD9833 with FSYNC pin = 10 and a master clock frequency of 24MHz
+  AD9833 sigGen( FSYNC_PIN, 25000000 ); // Initialise our AD9833 with FSYNC pin and a master clock frequency of 25MHz
 #endif
 
 // Variables used to input data and walk through menu
