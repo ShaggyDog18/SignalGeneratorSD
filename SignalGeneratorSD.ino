@@ -41,7 +41,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
 - **#define ENABLE_MEANDRE05F_SIGMODE** - extra mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
     **Note:** Compatible with the new MD_AD9833 library only!
-- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
+- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. See explanation and EasyEDA link below. 
 - **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
 - **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
 - **#define USE_PHASE** - use Phase instead of the FREQ register; never use nor tested
@@ -74,7 +74,7 @@ There are several solution:
 So, I deployed the option#3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
 To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
 
-**Note:** The switch may be also a simple mechanical 2-position toggle switch!
+**Note:** The switch may also be  a simple mechanical 2-position toggle switch!
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
 
@@ -117,8 +117,8 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #endif
 
 #define BUTTON_OK  4
-#define TOGGLE_OUT 5      // switch out off is toggle to Meandre/CLK which is 5V out
-#define TOGGLE_CLK_VOUT 6 // switch output sine voltage between 3.3v (default) / 5v 
+#define TOGGLE_OUT 5      // switch the out off if toggle to Meandre/CLK which is 5V out to protect the output from saturation (under development)
+#define TOGGLE_CLK_VOUT 6 // switch output sine voltage between 3.3v (default) and 5v 
 #define FSYNC_PIN  10
 
 // LCD Settings
@@ -246,21 +246,21 @@ void setup() {
   lcd.begin();
   
 #ifdef USE_PHASE  
-  lcd.createChar(0, phi ); // Custom PHI char for LCD
+  lcd.createChar(0, phi); // Custom PHI char for LCD
 #else
-   lcd.createChar(0, ff ); // Custom FF char for LCD
+   lcd.createChar(0, ff); // Custom FF char for LCD
 #endif
 
 #if defined( GRAPH_ICONS ) or defined( ENABLE_VOUT_SWITCH )
-  lcd.createChar(1, meander ); // Custom meandre char for LCD
+  lcd.createChar(1, meander); // Custom meandre char for LCD
 #endif
 #ifdef GRAPH_ICONS
-  lcd.createChar(2, sine[0] ); // Custom sine 1/3 char for LCD
-  lcd.createChar(3, sine[1] ); // Custom sine 2/3 char for LCD
-  lcd.createChar(4, sine[2] ); // Custom sine 3/3 char for LCD
-  lcd.createChar(5, triangle[0] ); // Custom triangle 1/3 char for LCD
-  lcd.createChar(6, triangle[1] ); // Custom triangle 2/3 char for LCD
-  lcd.createChar(7, triangle[2] ); // Custom triangle 3/3 char for LCD
+  lcd.createChar(2, sine[0]); // Custom sine 1/3 char for LCD
+  lcd.createChar(3, sine[1]); // Custom sine 2/3 char for LCD
+  lcd.createChar(4, sine[2]); // Custom sine 3/3 char for LCD
+  lcd.createChar(5, triangle[0]); // Custom triangle 1/3 char for LCD
+  lcd.createChar(6, triangle[1]); // Custom triangle 2/3 char for LCD
+  lcd.createChar(7, triangle[2]); // Custom triangle 3/3 char for LCD
 #endif  
 
   // Launch Screen
@@ -551,8 +551,8 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
           break;
           
       case SETTING_MENU: 
-          cursorInputPos++;
-          #ifdef ENABLE_VOUT_SWITCH
+          cursorInputPos++;  	// changing input positions in a loop
+          #ifdef ENABLE_VOUT_SWITCH		// jump over the VOUT_SWITCH input position in case of sine or triangle signal modes
           #ifdef ENABLE_MEANDRE05F_SIGMODE
             if( (settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && 
                  settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
@@ -560,7 +560,7 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
             if( settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos++;
           #endif
           #endif
-          if (cursorInputPos > NUMBER_INPUT_POSITIONS-1 ) cursorInputPos = IP_FREQUENCY;
+          if( cursorInputPos == NUMBER_INPUT_POSITIONS ) cursorInputPos = IP_FREQUENCY;
           setCursor2inputPosition( cursorInputPos );
           break;
 
@@ -602,11 +602,11 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
     case RotaryEncoder::Direction::FAST_CCW:
       switch( menuState ) {
       case SETTING_MENU:
-          if( cursorInputPos == IP_FREQUENCY )
+          if( cursorInputPos == IP_FREQUENCY )		// changing input positions in a loop
             cursorInputPos = NUMBER_INPUT_POSITIONS-1;
           else {
             cursorInputPos--;
-            #ifdef ENABLE_VOUT_SWITCH
+            #ifdef ENABLE_VOUT_SWITCH  // jump over the VOUT_SWITCH input position in case of sine or triangle signal modes
             #ifdef ENABLE_MEANDRE05F_SIGMODE
               if( (settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE && 
                    settings.currentMode[(uint8_t)settings.currentChannel] != SIGMODE_MEANDRE05F) && cursorInputPos == IP_VOUT_SWITCH ) cursorInputPos--;

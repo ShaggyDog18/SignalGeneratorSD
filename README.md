@@ -10,7 +10,11 @@ Original firmware and hardware solution/schematic by: **Cezar Chirila**
 
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
-Also, promoted by **GreatScott** with some simplified schematic: https://www.youtube.com/watch?v=Y1KE8eAC9Bk 
+Also, the project was promoted by **GreatScott** with some simplified schematic: https://www.instructables.com/id/DIY-FunctionWaveform-Generator/
+
+https://www.youtube.com/watch?v=Y1KE8eAC9Bk 
+
+If you like the new look and feel of SignalGeneratorSD please consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)
 
 ## Change Log:
 
@@ -44,7 +48,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
 - **#define ENABLE_MEANDRE05F_SIGMODE** - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 	**Note:** Compatible with the new MD_AD9833 library only!
-- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level of either 3.3v or 5v; switched from menu by pin 6. EasyEDA link: 
+- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
 - **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
 - **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
 - **#define USE_PHASE** - use Phase instead of the FREQ register; never use nor tested
@@ -74,7 +78,7 @@ There are several solution:
 2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
 3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
-**Note:** The switch may be also a simple mechanical 2-position toggle switch!
+**Note:** The switch may also be a simple mechanical 2-position toggle switch!
 
 So, I deployed the option#3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
 To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
