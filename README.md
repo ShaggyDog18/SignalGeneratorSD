@@ -11,9 +11,10 @@ Original firmware and hardware solution/schematic by: **Cezar Chirila**
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
 Also, the project was promoted by **GreatScott** with some simplified schematic: https://www.instructables.com/id/DIY-FunctionWaveform-Generator/
+
 https://www.youtube.com/watch?v=Y1KE8eAC9Bk 
 
-**If you like the new look and feel of SignalGeneratorSD please consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
+**If you like the new look and feel of SignalGeneratorSD, please, consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
 
 ## Change Log:
 
@@ -42,15 +43,15 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
-- **#define USE_MD_LIB** – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
-- **#define GRAPH_ICONS** - use graphical icons for signal representation on the display; Original Text labels can be used if commented
-- **#define ENABLE_EEPROM** - save settings to EEPROM, recover them at startup  
-- **#define ENABLE_MEANDRE05F_SIGMODE** - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
+- `#define USE_MD_LIB` – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
+- `#define GRAPH_ICONS` - use graphical icons for signal representation on the display; Original Text labels can be used if commented
+- `#define ENABLE_EEPROM'- save settings to EEPROM, recover them at startup  
+- `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 	**Note:** Compatible with the new MD_AD9833 library only!
-- **#define ENABLE_VOUT_SWITCH** - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
-- **#define SWAP_ENCODER_DIRECTION** - swap encoder pins if encoder is detecting rotation incorrectly
-- **#define LCD_I2C_ADDRESS 0x3f** - may need to change I2C address of the display module
-- **#define USE_PHASE** - use Phase instead of the FREQ register; never use nor tested
+- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
+- `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly
+- `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module
+- `#define USE_PHASE` - use Phase instead of the FREQ register; never use nor tested
 
 At the first start EEPROM: CRC Error will be shown. Will automatically reset settings to default and write them to EEPROM.
 
