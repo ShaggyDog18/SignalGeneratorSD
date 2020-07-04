@@ -86,4 +86,4 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awaila
 
 Enjoy!
 
-**If you like the new look and feel of SignalGeneratorSD, please, consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
+**If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
