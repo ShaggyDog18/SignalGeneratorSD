@@ -69,16 +69,21 @@ Hold the button until display's backlight starts blinking. Backlight will blink 
 
 ## Known Feature
 
-AD98333 module generates meandre (square signal) at its VCC level. So, if VCC bus is +5V, then amplitude of the square sugnal is 5V. 
-In some cases a signal of 3.3v may be required. 
+AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave output sugnal is +5v. 
+In some cases a signal of +3.3v TTL may be required. 
+
 There are several solution:
-1. use 3.3v power bus for entire solutoin.
-2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup (plain rough solution).
+1. use 3.3v power bus for entire solution.
+2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup including both uController and A9833 module (plain-rough solution).
 3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
 
 **Note:** The switch may also be a simple mechanical 2-position toggle switch!
 
-So, I deployed the option#3: added an output cascade/buffer for meander signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin, and flip its power bus between 5v and 3.3v from firmware (menu). 
-To activate the feature in the firmware uncomment: **#define ENABLE_VOUT_SWITCH**
+So, I deployed the option#3: added an output buffer for meander/squarewave signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin. By flipping the Schmitt-trigger's power bus between +5v and +3.3v, the output signal amplitude is switched accordingly. The switching is done from firmware (menu) by pin 6. 
+To activate the feature in the firmware uncomment: `#define ENABLE_VOUT_SWITCH`
 
-Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
+Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awailable at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
+
+Enjoy!
+
+**If you like the new look and feel of SignalGeneratorSD, please, consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
