@@ -24,7 +24,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Used EEPROM to store and recover settings.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
 
-## Hardware
+## Hardware:
 
 - Any ATMega328P or 168P chip based Arduino board (UNO, Nano, Pro Mini)
 - AD9833 Programmable Waveform Generator Module
