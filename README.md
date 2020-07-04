@@ -23,7 +23,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
 - Used EEPROM to store and recover settings.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
-- More convinient and fast way of input frequency by rotary encoder (if you still like the old way, commnemt `#define NEW_WAY_INPUT_FREQ`): 
+- More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   
