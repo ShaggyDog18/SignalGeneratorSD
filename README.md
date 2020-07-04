@@ -34,16 +34,16 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 Download and install all below libraries as regular libraries in your Arduino IDE:
 
-- MD_A9833, modified:  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF feature)
-- RotaryEncoder, modified: https://github.com/ShaggyDog18/RotaryEncoder
-- GyverButton: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
-- LCD1602 I2C display: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
+- **MD_A9833**, modified:  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF feature)
+- **RotaryEncoder**, modified: https://github.com/ShaggyDog18/RotaryEncoder
+- **GyverButton**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
+- **LCD1602 I2C** display: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 
 ## Compile Options/Firmware Configuration:
 
 - `#define USE_MD_LIB` – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - `#define GRAPH_ICONS` - use graphical icons for signal representation on the display; Original Text labels can be used if commented
-- `#define ENABLE_EEPROM'- save settings to EEPROM, recover them at startup  
+- `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup  
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 	**Note:** Compatible with the new MD_AD9833 library only!
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
