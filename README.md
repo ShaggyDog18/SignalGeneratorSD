@@ -72,14 +72,14 @@ Hold the button until display's backlight starts blinking. Backlight will blink 
 AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave output sugnal is +5v. 
 In some cases a signal of +3.3v TTL may be required. 
 
-There are several solution:
+There are several solutions:
 1. use 3.3v power bus for entire solution.
-2. add 3.3v voltage regulator and switch between 5v and 3.3v power bus for entire setup including both uController and A9833 module (plain-rough solution).
-3. add 3.3v voltage regulator and switch power bus of an output buffer (deployed). 
+2. add 3.3v voltage regulator and switch between +5v and +3.3v power bus for entire setup including both uController and A9833 module (plain-rough solution).
+3. add 3.3v voltage regulator and output buffer; switch power bus between +5v and +3.3v for the output buffer only (deployed, switching from menu by flipping pin#6). 
 
-**Note:** The switch may also be a simple mechanical 2-position toggle switch!
+**Note:** The +5v/+3.3v power buss switch may also be a simple mechanical 2-position toggle switch!
 
-So, I deployed the option#3: added an output buffer for meander/squarewave signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin. By flipping the Schmitt-trigger's power bus between +5v and +3.3v, the output signal amplitude is switched accordingly. The switching is done from firmware (menu) by pin 6. 
+So, I deployed the option#3: added an output buffer for meander/squarewave signal only based on Schmitt-trigger (for example, 74LVC1G14) which is connected right to the AD9833 out pin. By flipping the Schmitt-trigger's power bus between +5v and +3.3v, the output signal amplitude is switched accordingly. The switching is done from firmware (menu) by pin#6. 
 To activate the feature in the firmware uncomment: `#define ENABLE_VOUT_SWITCH`
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awailable at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
