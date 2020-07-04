@@ -24,7 +24,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
 - Used EEPROM to store and recover settings.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
-- More convinient and fast way of input frequency by rotary encoder (if you still like the old way, commnemt `#define NEW_WAY_INPUT_FREQ`): 
+- More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   
@@ -94,7 +94,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only
-#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
+//#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
@@ -582,7 +582,7 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
           if( _rotaryDirection == RotaryEncoder::Direction::FAST_CW )
             frequency += power(10, digitPos+1);
           else  // slow encoder rotation
-			      frequency += power(10, digitPos);
+            frequency += power(10, digitPos);
            
           if( frequency > maxFrequency ) frequency = maxFrequency;
           updateDisplay = true;
