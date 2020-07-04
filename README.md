@@ -73,9 +73,9 @@ AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VC
 In some cases a signal of +3.3v TTL may be required. 
 
 There are several solutions:
-1. use 3.3v power bus for entire solution.
-2. add 3.3v voltage regulator and switch between +5v and +3.3v power bus for entire setup including both uController and A9833 module (plain-rough solution).
-3. add 3.3v voltage regulator and output buffer; switch power bus between +5v and +3.3v for the output buffer only (deployed, switching from menu by flipping pin#6). 
+1. use +3.3v power bus for entire solution (will not have +5v output squarewave signal then).
+2. add +3.3v voltage regulator and switch between +5v and +3.3v power bus for entire setup including both uController and A9833 module (plain-rough solution).
+3. add +3.3v voltage regulator and an output buffer; flip power bus between +5v and +3.3v for the output buffer only (deployed, switching from menu by flipping pin#6). 
 
 **Note:** The +5v/+3.3v power buss switch may also be a simple mechanical 2-position toggle switch!
 
