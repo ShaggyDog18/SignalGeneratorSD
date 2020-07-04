@@ -6,8 +6,7 @@ github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
 License: [GNU GPLv3](https://choosealicense.com/licenses/gpl-3.0/)
 
-Original firmware and hardware solution/schematic by: **Cezar Chirila**
-
+Original firmware and hardware solution/schematic by: **Cezar Chirila**; 
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
 Also, the project was promoted by **GreatScott** with some simplified schematic: https://www.instructables.com/id/DIY-FunctionWaveform-Generator/; 
