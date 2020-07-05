@@ -46,7 +46,6 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
-- `#define USE_MD_LIB` – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - `#define GRAPH_ICONS` - use graphical icons for signal representation on the display; Original Text labels can be used if commented
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup  
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
@@ -95,7 +94,6 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 
 */
 // --- COMPILER CONFIG ----
-#define USE_MD_LIB      // new bug-free library
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only
@@ -104,11 +102,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define HIDE_LEADING_ZEROS  // hide leading zeros in the frequency value  
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
-//---------------- Config Checkup --------
-#ifndef USE_MD_LIB 
-  #undef ENABLE_MEANDRE05F_SIGMODE // compatible with the new MD_AD9833 library only
-#endif
-//----------------
+// ------------------------
 
 #include <avr/delay.h>
 #include <LiquidCrystal_I2C.h>
@@ -119,11 +113,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
   #include <avr/eeprom.h>
 #endif
 
-#ifdef USE_MD_LIB
-  #include <MD_AD9833.h>  // modified library. Midifications are commented with ShaggyDog keyword
-#else
-  #include "AD9833.h"
-#endif
+#include <MD_AD9833.h>  // modified library. Midifications are commented with ShaggyDog keyword
 
 #ifdef SWAP_ENCODER_DIRECTION
   #define DT 2  // encoder
@@ -149,11 +139,7 @@ LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD I
 RotaryEncoder encoder( DT, CLK );     // Initialise the encoder on pins 2 and 3 (interrupt pins)
 GButton buttonOK( BUTTON_OK );
 
-#ifdef USE_MD_LIB
-  MD_AD9833 sigGen( FSYNC_PIN );  // Hardware SPI
-#else  
-  AD9833 sigGen( FSYNC_PIN, 25000000 ); // Initialise our AD9833 with FSYNC pin and a master clock frequency of 25MHz
-#endif
+MD_AD9833 sigGen( FSYNC_PIN );  // Hardware SPI
 
 // Variables used to input data and walk through menu
 #ifdef ENABLE_VOUT_SWITCH
@@ -290,9 +276,7 @@ void setup() {
   lcd.print(F("-ShaggyDog 2020-"));
   _delay_ms(1500);
 
-#ifdef USE_MD_LIB
   sigGen.begin(); // it also set up all default values
-#endif
 
 #ifdef ENABLE_EEPROM
   bool resetSettings = false;
@@ -323,23 +307,6 @@ void setup() {
   if( resetSettings) writeSettingsToEEPROM();
 #endif
   
-#ifndef USE_MD_LIB
-  // Initialise the AD9833 with 1KHz sine output, no phase shift for both
-  // registers and remain on the FREQ0 register/channel
-  // sigGen.lcdDebugInit(&lcd);
-  sigGen.reset(1);
-  sigGen.setFPRegister(0);
-  sigGen.setFreq(settings.frequency[0]);
-  sigGen.setPhase(0);
-  sigGen.setFPRegister(1);
-  sigGen.setFreq(settings.frequency[1]);
-  sigGen.setPhase(0);
-  // set current channel and mode
-  sigGen.setFPRegister((uint8_t)settings.currentChannel);
-  sigGen.mode( settings.currentMode[(uint8_t)settings.currentChannel] );
-  sigGen.reset(0);
-#endif
-
   // Set pins A and B for encoder as interrupts
   attachInterrupt(digitalPinToInterrupt(DT),  encoderTickISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(CLK), encoderTickISR, CHANGE);
@@ -438,12 +405,7 @@ void processSingleClick(void) {
              
           case IP_ONOFF: // switch an output generator signal on / off
             signalOn = ! signalOn;
-            #ifdef USE_MD_LIB
-              sigGen.setModeSD(signalOn ? MD_AD9833::MODE_ON : MD_AD9833::MODE_OFF); 
-            #else
-              sigGen.sleep( signalOn ? 3 : 0); // Both DAC and clock turned ON
-                                             // DAC and clock are turned OFF
-            #endif
+            sigGen.setModeSD(signalOn ? MD_AD9833::MODE_ON : MD_AD9833::MODE_OFF); 
             break;
             
 #ifndef USE_PHASE          // If USE_PHASE has not been set
@@ -489,11 +451,7 @@ void processSingleClick(void) {
         digitPos++;
       } else {
         digitPos = 0;
-        #ifdef USE_MD_LIB
-          sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
-        #else
-          sigGen.setPhase(phase);
-        #endif
+        sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
         jump2settingMenu();
       }
       break;      
@@ -517,11 +475,7 @@ void processLongPress(void) {
 #ifdef  USE_PHASE // never tested
   case PHASE_SETTING: 
     // setPhase here
-    #ifdef USE_MD_LIB
-      sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
-    #else
-      sigGen.setPhase(phase);
-    #endif
+    sigGen.setPhase( settings.currentChannel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, phase );
     jump2settingMenu();
     break;
 #endif
@@ -837,7 +791,6 @@ unsigned long power(int a, int b) {
 }
 
 
-#ifdef USE_MD_LIB
 void setADsignalMode( sigmode_t _currentMode ) {
   switch( _currentMode ) {
   case SIGMODE_SINE:     sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
@@ -863,28 +816,6 @@ void setADchannel( bool _channel ) {
     frequency = settings.frequency[0];
   }
 } // setADchannel()
-
-#else // old error-fixed library
-
-void setADsignalMode( sigmode_t _currentMode ) {
-  sigGen.mode( _currentMode );
-} // setADsignalMode()
-
-void setADfrequency(  bool _channel, unsigned long _frequency ) {
-  sigGen.setFPRegister((uint8_t) _channel );
-  sigGen.setFreq( _frequency );
-} // setADfrequency()
-
-void setADchannel( bool _channel ) {
-  if( _channel ) {
-    sigGen.setFPRegister(1);
-    frequency = settings.frequency[1];
-  } else {
-    sigGen.setFPRegister(0);
-    frequency = settings.frequency[0];
-  }
-} // setADchannel()
-#endif
 
 
 void blinkDisplayBacklight( uint8_t nBlinks ) {

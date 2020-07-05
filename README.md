@@ -16,7 +16,8 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 ## Change Log:
 
-- Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button and, most important, for AD9833 module (I’ve never used a PHASE option... so, did not test it)
+- Use MD_A9833(modified) to controll the AD9833 Module: compact and buf-free library with great functions
+- Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button 
 - Added graphic icons for signal representation on the display.
 - Slightly changed navigation (see Navigation section below).
 - Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
@@ -27,7 +28,8 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
-  
+  **Note**: I’ve never used a PHASE option... so, did not even test it. Use it at your risk...
+
 ## Hardware:
 
 - Any ATMega328P or 168P chip based Arduino board (UNO, Nano, Pro Mini)
@@ -38,18 +40,16 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 Download and install all below libraries as regular libraries in your Arduino IDE:
 
-- **MD_A9833**, modified:  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF feature)
+- **MD_A9833**, modified:  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF functions)
 - **RotaryEncoder**, modified: https://github.com/ShaggyDog18/RotaryEncoder
 - **GyverButton**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
 - **LCD1602 I2C** display: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 
 ## Compile Options/Firmware Configuration:
 
-- `#define USE_MD_LIB` – use a new MD_AD9833 library: smaller, no bugs, trust more.  Still may compile with the old and  fixed AD9833 library by commenting. Strongly suggest using the new one.
 - `#define GRAPH_ICONS` - use graphical icons for signal representation on the display; Original Text labels can be used if commented
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup  
-- `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: square wave out signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-	**Note:** Compatible with the new MD_AD9833 library only!
+- `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
 - `#define HIDE_LEADING_ZEROS` - hide leading zeros in the frequency value; if you like the old way - comment it!
