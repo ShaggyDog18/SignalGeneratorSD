@@ -141,10 +141,10 @@ Enjoy!
 #define FREQ_N_DIGITS 8  // number of digits for frequency to display
 
 LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD Initialise
-RotaryEncoder encoder( DT, CLK );     // Initialise the encoder on pins 2 and 3 (interrupt pins)
-GButton buttonOK( BUTTON_OK );
+RotaryEncoder encoder( DT, CLK );  // initialise the encoder on pins 2 and 3 (interrupt pins)
+GButton buttonOK( BUTTON_OK );     // initialize Encoder Button
 
-MD_AD9833 sigGen( FSYNC_PIN );  // Hardware SPI
+MD_AD9833 sigGen( FSYNC_PIN );    // initialize AS9833 module, connected to hardware SPI
 
 // Variables used to input data and walk through menu
 #ifdef ENABLE_VOUT_SWITCH
