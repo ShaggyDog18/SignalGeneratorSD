@@ -1,4 +1,4 @@
-# SignalGeneratorSD (SD mod) based on AD9833 Module
+# SignalGeneratorSD based on AD9833 Module
 
 by **ShaggyDog18@gmail.com**, JUNE 2020
 
