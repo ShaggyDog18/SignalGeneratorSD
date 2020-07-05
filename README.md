@@ -16,17 +16,17 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 ## Change Log:
 
-- Use MD_A9833(modified) to controll the AD9833 Module: compact and buf-free library with great functions
+- Use MD_A9833(modified) to control the AD9833 Module: compact and bug-free library with great functions
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
 - Improved navigation (see Navigation section below).
 - Added graphic icons for signal representation on the display.
 - Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
-- Used EEPROM to store and recover settings.
+- Use EEPROM to store and recover settings.
 - Option to hide leading Zeros in frequency representation.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
-- More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
-  - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
+- More convenient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
+  - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   **Note**: I’ve never used a PHASE option... so, did not even test it. Use it at your risk...
 
