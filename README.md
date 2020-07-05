@@ -47,14 +47,14 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
-- `#define GRAPH_ICONS` - use graphical icons for signal representation on the display; Original Text labels can be used if commented
+- `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup  
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
 - `#define HIDE_LEADING_ZEROS` - hide leading zeros in the frequency value; if you like the old way - comment it!
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module
+- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 
 ## Improved Navigation:
@@ -76,9 +76,9 @@ Hold the button until display's backlight starts blinking. Backlight will blink 
 - Double click anywhere except input frequency -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
 - At the first launch of the firmware `Error:CRC EEPROM` will be shown because no settings are in the EEPROM yet. Settings will be automatically set to default and saved to EEPROM. The error will not appear any more.
 
-## Known Feature
+## Squarewave Signal Amplitude Feature
 
-AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave output sugnal is +5v. 
+AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave sugnal is +5v. 
 In some cases a signal of +3.3v TTL may be required. 
 
 There are several solutions:
