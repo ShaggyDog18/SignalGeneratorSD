@@ -785,15 +785,13 @@ void toggleCLKvolt( bool _toggleOutVolt ) {
 }
 
 
-unsigned long power(int a, int b) {
+unsigned long power(uint8_t a, uint8_t b) {
   unsigned long res;
-  if (b == 0) {
+  if( b == 0 ) {
     res = 1;
   } else {
-    res = a;
-    for (int i = 0; i < (b - 1); i++) {
-      res *= a;
-    }
+    res = a; b--;
+    for( uint8_t i = 0; i < b; i++ ) res *= a;
   }
   return res;
 }
