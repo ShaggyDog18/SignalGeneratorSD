@@ -17,9 +17,9 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 ## Change Log:
 
 - Use MD_A9833(modified) to controll the AD9833 Module: compact and buf-free library with great functions
-- Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button 
+- Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
+- Improved navigation (see Navigation section below).
 - Added graphic icons for signal representation on the display.
-- Slightly changed navigation (see Navigation section below).
 - Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
 - Used EEPROM to store and recover settings.
