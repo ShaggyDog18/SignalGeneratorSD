@@ -23,6 +23,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
 - Used EEPROM to store and recover settings.
+- Option to hide leading Zeros in frequency representation.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
 - More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
@@ -52,17 +53,21 @@ Download and install all below libraries as regular libraries in your Arduino ID
 	**Note:** Compatible with the new MD_AD9833 library only!
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
+- `#define HIDE_LEADING_ZEROS` - hide leading zeros in the frequency value; if you like the old way - comment it!
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 
-## Navigation:
+## Improved Navigation:
 
 - Single button click at the default screen -> go to SETTING_MODE.
+- Input frequency value:
+  - Single click -> jump to left to more significunt number.
+  - Double click -> jump to right to less significunt number.
+  - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
+  - Fast encoder rotartion -> change value of more significant digit than current digit position (only if `NEW_WAY_INPUT_FREQ` is defined).
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
-- Encoder rotation at input frequency -> change value of the current digit (underlined by a cursor) of the frequency value.
-- Fast encoder rotartion at input frequency -> change value of more significant digit than current digit position (only if `NEW_WAY_INPUT_FREQ` is defined).
-- Single button click at active input parameter -> change parameter value. The new value is immediately applied.
+- Single click at active input parameter -> change parameter value. The new value is immediately applied.
 - Long button press anywhere in settings -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
 
 #### If EEPROM is enabled:
@@ -96,6 +101,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 at [EasyE
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only
 //#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
+#define HIDE_LEADING_ZEROS  // hide leading zeros in the frequency value  
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
 //---------------- Config Checkup --------
@@ -364,14 +370,8 @@ void loop() {
   // process button clicks
   if( buttonOK.isSingle() ) processSingleClick(); // single click
   if( buttonOK.isHolded() ) processLongPress();   // long press
+  if( buttonOK.isDouble() ) processDoubleClick(); // double click
   
-  #ifdef ENABLE_EEPROM
-    if( buttonOK.isDouble() ) { // double click -> write settings to EEPROM
-      writeSettingsToEEPROM();
-      blinkDisplayBacklight(2); // double blink to confirm operation of writing to EEPROM
-    }
-  #endif
-
   processEncoder( encoder.getDirection() );  
 
   if( updateDisplay ) {   // Update display if needed
@@ -532,6 +532,21 @@ void processLongPress(void) {
     break;
   } // switch( menuState )
 } //  processLongPress(void)
+
+
+void processDoubleClick(void) {
+  switch( menuState ) {
+  case FREQUENCY_SETTING: 
+    if( digitPos > 0 ) digitPos--;
+    break;
+    
+  default: 
+  #ifdef ENABLE_EEPROM 
+      writeSettingsToEEPROM();
+      blinkDisplayBacklight(2); // double blink to confirm operation of writing to EEPROM
+  #endif
+  }
+}  // processDoubleClick(void)
 
 
 void setCursor2inputPosition( uint8_t _cursorPosition ) {
@@ -706,29 +721,28 @@ void jump2settingMenu(void) {
 } // jump2settingMenu()
 
 
-
-// old way (power and multiplications=10102/449 : new=10076/449
 // Function to display the current frequency in the top left corner
 void displayFrequency( unsigned long _frequencyToDisplay ) {
   lcd.setCursor(0,0); 
   lcd.print( F("f=") );
   
   uint8_t dispBuffer[FREQ_N_DIGITS] = {0,0,0,0,0,0,0,0};
-  for( uint8_t i=0; i<FREQ_N_DIGITS; i++ ) {
+  uint8_t i;
+  for( i=0; i<FREQ_N_DIGITS; i++ ) {
     dispBuffer[i] = _frequencyToDisplay % 10;
     _frequencyToDisplay /= 10;
     if( _frequencyToDisplay == 0 ) break;
   }
-  for( int8_t i=FREQ_N_DIGITS-1; i >= 0; i-- ) lcd.print(dispBuffer[i]);
-/*
- *
-// old way - too many power 10X operations
-  for (int i = 7; i >= 0; i--) {
-    unsigned char dispDigit = _frequencyToDisplay / power(10, i);
-    lcd.print(dispDigit);
-    _frequencyToDisplay -= dispDigit * power(10, i);
+  // i now indicates the place of the last most significant meaningful digit 
+  
+  for( int8_t j=FREQ_N_DIGITS-1; j >= 0; j-- ) {
+    #ifdef HIDE_LEADING_ZEROS
+      if( j>i ) lcd.print( ' ' );
+      else lcd.print( dispBuffer[j] );
+    #else
+      lcd.print(dispBuffer[j]);
+    #endif
   }
-*/
   lcd.print( F("Hz") );
 } // displayFrequency()
 

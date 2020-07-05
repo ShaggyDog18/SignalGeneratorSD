@@ -22,6 +22,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Renamed FREQuency register on the display to CHANnel: so, now it looks like CHAN0 and CHAN1.
 - Tied a signal mode to a CHANnel; so, now you may change signal form along with its frequency.
 - Used EEPROM to store and recover settings.
+- Option to hide leading Zeros in frequency representation.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module.
 - More convinient and fast way of input frequency by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/encreases it.
@@ -51,24 +52,28 @@ Download and install all below libraries as regular libraries in your Arduino ID
 	**Note:** Compatible with the new MD_AD9833 library only!
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below.  
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
+- `#define HIDE_LEADING_ZEROS` - hide leading zeros in the frequency value; if you like the old way - comment it!
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 
-## Navigation:
+## Improved Navigation:
 
-- Single button click at the default screen -> go to SETTING_MODE.
+- Single button click at the default operation screen -> go to SETTING_MODE.
+- Input frequency value:
+  - Single click -> jump to the left to more significunt number.
+  - Double click -> jump to the right to less significunt number.
+  - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
+  - Fast encoder rotation -> change value of more significant digit rather than the current digit position (only if `NEW_WAY_INPUT_FREQ` is defined).
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
-- Encoder rotation at input frequency -> change value of the current digit (underlined by a cursor) of the frequency value.
-- Fast encoder rotartion at input frequency -> change value of more significant digit than current digit position (only if `NEW_WAY_INPUT_FREQ` is defined).
-- Single button click at active input parameter -> change parameter value. The new value is immediately applied.
-- Long button press anywhere in settings -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
+- Single click at active input parameter -> change parameter value. The new value is immediately applied.
+- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
 
 #### If EEPROM is enabled:
 
 - Press and hold button during start up -> reset settings to default (just for the current session, does not write default settings to EEPROM).
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
-- Double click anywhere -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
+- Double click anywhere except input frequency -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
 - At the first launch of the firmware `Error:CRC EEPROM` will be shown because no settings are in the EEPROM yet. Settings will be automatically set to default and saved to EEPROM. The error will not appear any more.
 
 ## Known Feature
