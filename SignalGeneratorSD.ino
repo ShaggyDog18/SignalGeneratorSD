@@ -144,7 +144,7 @@ Enjoy!
 LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD Initialise
 RotaryEncoder encoder( DT, CLK );  // initialise the encoder on pins 2 and 3 (interrupt pins)
 GButton buttonOK( BUTTON_OK );     // initialize Encoder Button
-MD_AD9833 sigGen( FSYNC_PIN );    // initialize AS9833 module, connected to hardware SPI
+MD_AD9833 sigGen( FSYNC_PIN );     // initialize AS9833 module, connected to hardware SPI
 
 // Variables used to input data and walk through menu
 #ifdef ENABLE_VOUT_SWITCH
@@ -314,9 +314,9 @@ void setup() {
   // Set pins A and B for encoder as interrupts
   attachInterrupt(digitalPinToInterrupt(DT),  encoderTickISR, CHANGE);
   attachInterrupt(digitalPinToInterrupt(CLK), encoderTickISR, CHANGE);
-  // Initialise pin as input with pull-up enabled and debounce variable for
 
   #ifdef ENABLE_VOUT_SWITCH
+    // init pins and set them to default state 
     pinMode(TOGGLE_CLK_VOUT, OUTPUT);
     toggleCLKvolt( settings.toggleCLKoutVolt );  // 3.3v by default (LOW signal output)
     
@@ -324,9 +324,9 @@ void setup() {
     toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );     // under development
   #endif
 
-  // Set Cursor to initial possition, reset the screen
+  // Clear the screen
   lcd.clear();
-} // setup()
+} // end of setup()
 //---------------------------
 
 
@@ -365,7 +365,7 @@ void loop() {
   }
   menuPostProcessing();
   
-} // End loop()
+} // end of loop()
 //---------------------
 
 
@@ -741,17 +741,19 @@ void displayMode( sigmode_t _currentMode ) {
 } // displayMode()
 
 
-// Function to display the mode in the bottom left corner
 // Only used if you enable PHASE setting instead of FREQ register
 void displayPhase( unsigned int _phaseToDisplay ) {
   lcd.setCursor(0, 1);
-  lcd.write(0);
+  lcd.write(0); // phase sign
   lcd.print( F("=") );
-  for( int i = 3; i >= 0; i-- ) {
-    unsigned int dispDigit = _phaseToDisplay / power(10, i);
-    lcd.print(dispDigit);
-    _phaseToDisplay -= dispDigit * power(10, i);
+
+  uint8_t dispBuffer[4] = {0,0,0,0};
+  for( uint8_t i=0; i<4; i++ ) {
+    dispBuffer[i] = _phaseToDisplay % 10;
+    _phaseToDisplay /= 10;
+    if( _phaseToDisplay == 0 ) break;
   }
+  for( int8_t j=3; j >= 0; j-- ) lcd.print(dispBuffer[j]);
 } // displayPhase()
 
 
@@ -759,7 +761,7 @@ void displayPhase( unsigned int _phaseToDisplay ) {
 // corner
 void displayCurrentChannel( bool _channel ) {
   lcd.setCursor(0, 1);
-  lcd.print( F("CHAN") );
+  lcd.print( F("Chan") );
   lcd.print((uint8_t)_channel);
 } // displayCurrentChannel()
 
@@ -807,9 +809,11 @@ void setADsignalMode( sigmode_t _currentMode ) {
   }
 } // setADsignalMode()
 
+
 void setADfrequency( bool _channel, unsigned long _frequency ) {
   sigGen.setFrequency( _channel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, _frequency );
 } // setADfrequency()
+
 
 void setADchannel( bool _channel ) {
   if( _channel ) {
