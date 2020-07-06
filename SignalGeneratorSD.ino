@@ -762,7 +762,7 @@ void displayPhase( unsigned int _phaseToDisplay ) {
 // corner
 void displayCurrentChannel( bool _channel ) {
   lcd.setCursor(0, 1);
-  lcd.print( F("Chan") );
+  lcd.print( F("CHAN") );
   lcd.print((uint8_t)_channel);
 } // displayCurrentChannel()
 
