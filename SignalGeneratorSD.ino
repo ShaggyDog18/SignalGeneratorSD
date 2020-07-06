@@ -229,7 +229,6 @@ const uint8_t phi[] = {
 #else
 const uint8_t ff[] = { // "FF" sign of indication of "OFF" state 
 0b11100,0b10000,0b11000,0b10111,0b00100,0b00110,0b00100,0b00000 };
-#define FF (lcd.write( 0 ))
 #endif
 
 #if defined( GRAPH_ICONS ) or defined( ENABLE_VOUT_SWITCH )
@@ -710,7 +709,7 @@ void displayFrequency( unsigned long _frequencyToDisplay ) {
 
 // Function to display power state (ON/OFF) in the top right corner
 void displayPower( bool _signalOn ) {
-  #ifdef USE_PGHASE
+  #ifdef USE_PHASE
     lcd.setCursor(13, 0);
     lcd.print( _signalOn ? F("ON ") : F("OFF") );
   #else
@@ -718,7 +717,7 @@ void displayPower( bool _signalOn ) {
     if( _signalOn )
       lcd.print( F("ON") );
     else {
-      lcd.print(F("O")); FF;   //lcd.write( 0 ); //FF sign
+      lcd.print(F("O")); lcd.write( 0 ); //FF sign
     }
   #endif
 }
@@ -779,6 +778,7 @@ void displayCLKoutVolt( bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
   }
 } // displayCLKoutVolt()
 
+  
 void toggleCLKvolt( bool _toggleOutVolt ) {
  digitalWrite( TOGGLE_CLK_VOUT, _toggleOutVolt ? HIGH : LOW ); // HIGH = 5v, 3.3v
 }
