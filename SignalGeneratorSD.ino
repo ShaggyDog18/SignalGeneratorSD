@@ -741,19 +741,20 @@ void displayMode( sigmode_t _currentMode ) {
 } // displayMode()
 
 
+#define PHASE_N_DIGITS 4
 // Only used if you enable PHASE setting instead of FREQ register
 void displayPhase( unsigned int _phaseToDisplay ) {
   lcd.setCursor(0, 1);
   lcd.write(0); // phase sign
   lcd.print( F("=") );
 
-  uint8_t dispBuffer[4] = {0,0,0,0};
-  for( uint8_t i=0; i<4; i++ ) {
+  uint8_t dispBuffer[PHASE_N_DIGITS] = {0,0,0,0};
+  for( uint8_t i=0; i<PHASE_N_DIGITS; i++ ) {
     dispBuffer[i] = _phaseToDisplay % 10;
     _phaseToDisplay /= 10;
     if( _phaseToDisplay == 0 ) break;
   }
-  for( int8_t j=3; j >= 0; j-- ) lcd.print(dispBuffer[j]);
+  for( int8_t j=PHASE_N_DIGITS-1; j >= 0; j-- ) lcd.print(dispBuffer[j]);
 } // displayPhase()
 
 
