@@ -75,7 +75,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - Single click at active input parameter -> change parameter's value. The new value is immediately applied.
 - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
 - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
-The thousands delimiter is different from country to country. In the United States, this character is a comma (,). In Germany, a period (.); in Sweden, a space. 
+The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. 
 So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
 
 #### If EEPROM is enabled:
