@@ -61,7 +61,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
-- `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area.
+- `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
 
 ## Improved Navigation:
 
