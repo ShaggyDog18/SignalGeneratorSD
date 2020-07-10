@@ -245,7 +245,7 @@ unsigned long frequency = settings.frequency[0];
 uint8_t cursorInputPos = IP_FREQUENCY;
 
 #ifndef GRAPH_ICONS
-// LCD mode depicting constants
+// signal mode depicting constants
   #ifdef ENABLE_MEANDRE05F_SIGMODE
     const String mode[] = {"SIN", "TRI", "CLK", "C/2"};
   #else
@@ -754,12 +754,12 @@ void displayFrequency( unsigned long _frequencyToDisplay ) {
   
   for( int8_t j=FREQ_N_DIGITS-1; j >= 0; j-- ) {
     if( settings.displayFrequencyMode & NO_LEAD_ZERO_MASK ) { // hide leaading Zeros
-      if( j>i ) {
+      if( j>i ) {  // digits (zeros) before most significant digit in frequency value
         if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // delimiter sign is ON
           if( j == 5 || j == 2 ) lcd.print( ' ' );  // print space
         } 
         lcd.print( ' ' );
-      } else {
+      } else {  // digits after (including) most significant digit in frequency value
         if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // delimiter sign is ON
           if( j == 5 ) {
             if( i == 5 ) lcd.print( ' ' ); else lcd.print( DELIMITER );  // print either space or delimiter sign
