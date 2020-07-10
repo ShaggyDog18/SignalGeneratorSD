@@ -19,7 +19,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Use **MD_A9833**(modified) library to control the AD9833 Module: compact and bug-free library with great functions.
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
 - Improved navigation, essentially, coded from scratch (see Navigation section below).
-- **NEW** Improved the way frequency value is displayed (coded from scratch): 
+- **new** Improved the way frequency value is displayed (coded from scratch): 
   - option to hide leading zeros in frequency value (toggled by triple click of encoder button).
   - option to delimit thousands by a separation sign (toggled by triple click to encoder button). 
   - a selected option (one out of four possible combinations) is stored to EEPROM (if enabled) and is set at start up.
