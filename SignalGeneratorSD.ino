@@ -51,14 +51,16 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
-- `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented
-- `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup  
+
+- `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented.
+- `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup.
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
-- `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly
-- `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module
-- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter. 
+- `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
+- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
+- `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
+- `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
 
 ## Improved Navigation:
 
