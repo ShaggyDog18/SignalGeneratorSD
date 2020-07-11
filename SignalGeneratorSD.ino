@@ -510,7 +510,7 @@ void processSingleClick(void) {
         
 #ifdef  USE_PHASE // never tested
     case PHASE_SETTING:    // Phase setting
-      if( digitPos < 3 ) { 
+      if( digitPos < PHASE_N_DIGITS-1 ) { 
         digitPos++;
       } else {
         digitPos = 0;
