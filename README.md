@@ -30,6 +30,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - **NEW** More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
+  - **NEW** "Running" frequency - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
 - Renamed FREQuency register on the display to Channel: so, now it looks like Ch#0 and Ch#1.
 
 **Note**: I’ve never used/tested a PHASE option... Use it at your risk...
@@ -46,7 +47,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 Download and install all below libraries as regular libraries in your Arduino IDE environment (to the `Library` folder):
 
-- **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functionning of ON / OFF functions)
+- **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functioning  of ON / OFF functions)
 - **RotaryEncoder** (modified): https://github.com/ShaggyDog18/RotaryEncoder
 - **GyverButton**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
 - **LCD1602 I2C**: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
@@ -56,7 +57,8 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented.
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup.
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-- `#define NEW_WAY_INPUT_FREQ` - new faster and more convinient way of input frequency by encoder; if you like the old way - comment it!
+- `#define NEW_WAY_INPUT_FREQ` - new faster and more convenient  way of input frequency by encoder; if you like the old way - comment it!
+- **NEW** `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is c0mplete.
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
@@ -67,10 +69,11 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 - Single button click at the default operation screen -> go to SETTING_MODE.
 - Input frequency value:
-  - Single click -> jump to the left to more significunt number.
-  - Double click -> jump to the right to less significunt number.
+  - Single click -> jump to the left to more significant  number.
+  - Double click -> jump to the right to less significant  number.
   - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
+  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your input is completet.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Single click at active input parameter -> change parameter's value. The new value is immediately applied.
 - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
@@ -101,6 +104,8 @@ To activate the feature in the firmware uncomment: `#define ENABLE_VOUT_SWITCH`
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awailable at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
 
-Inhale new life into your Signal Generator! Enjoy!
+## Gratitude
 
 **If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/5USD)**
+
+Inhale new life into your Signal Generator! Enjoy!
