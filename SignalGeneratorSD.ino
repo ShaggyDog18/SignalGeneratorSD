@@ -117,11 +117,17 @@ Inhale new life into your Signal Generator! Enjoy!
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only; if you do not need it - comment!
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
 #define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.5 sec delay. The new frequency value is applied in 0.5 sec after your input is complete.
-//#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
+#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
 // ------------------------
+
+//Check up and correct Compiler Configuration
+#if defined( RUNNING_FREQUENCY ) && !defined( NEW_WAY_INPUT_FREQ )
+  #define NEW_WAY_INPUT_FREQ  // Runing frequency works in the NEW_WAY_INPUT_FREQ only!
+#endif
+//-------------------------
 
 // --- INCLUDE SECTION ---
 #include <avr/delay.h>
@@ -181,7 +187,7 @@ enum menuState_t : uint8_t {
   #endif
 } menuState = DEFAULT_SCREEN;
 
-enum sigmode_t : uint8_t {
+enum sigmode_t : uint8_t {  // SigMode <=> Signal Mode
   SIGMODE_SINE = 0,
   SIGMODE_TRIANGLE,
   SIGMODE_MEANDRE,
@@ -192,13 +198,13 @@ enum sigmode_t : uint8_t {
 };
 
 enum inputPositions_t : uint8_t {
-  IP_FREQUENCY = 0,
+  IP_FREQUENCY = 0, // IP means Input Position
   IP_ONOFF,
   IP_CHANNEL,
   #ifdef ENABLE_VOUT_SWITCH
     IP_VOUT_SWITCH,
   #endif
-  IP_MODE,
+  IP_SIGNAL_MODE,
   NUMBER_INPUT_POSITIONS
 };
 
@@ -244,7 +250,7 @@ uint16_t phase = 0;
 #endif
 
 // flags
-bool defaultScreenFirstPass = true;
+bool defaultScreenUpdateFlag = true;
 bool updateDisplayFlag = true;
 bool signalOn = true;
 #ifdef RUNNING_FREQUENCY 
@@ -310,7 +316,7 @@ void setup() {
 #ifdef USE_PHASE  
   lcd.createChar(0, phi); // Custom graphic PHI char for LCD
 #else
-  lcd.createChar(0, ff); // Custom graphic FF char for LCD
+  lcd.createChar(0, ff); // Custom graphic FF char for LCD to indicate "Signal OFF" state 
 #endif
 
 #if defined( GRAPH_ICONS ) or defined( ENABLE_VOUT_SWITCH )
@@ -333,7 +339,7 @@ void setup() {
   lcd.print(F("-ShaggyDog 2020-"));
   _delay_ms(1500);
 
-  // InitiTE AD9833 module
+  // Initite AD9833 Module
   sigGen.begin(); // it also set up all default values
 
 #ifdef ENABLE_EEPROM
@@ -384,7 +390,7 @@ void setup() {
 
 
 // print settings Reset message: called twice, defined as a separate function to optimize the code
-void lcdPrintResetMsg( uint8_t _line ) {  // print Reset message in a line # x
+void lcdPrintResetMsg( const uint8_t _line ) {  // print Reset message in a line # x
   lcd.setCursor( 0, _line );
   lcd.print( F("Reset to default") );  
 }  // lcdPrintResetMsg()
@@ -392,7 +398,7 @@ void lcdPrintResetMsg( uint8_t _line ) {  // print Reset message in a line # x
 
 
 // ISR routine for Encoder
-void encoderTickISR( void ) {
+void encoderTickISR(void) {
   encoder.tick(); 
 }
 //---------------------
@@ -442,32 +448,33 @@ void loop() {
     setCursor2inputPosition( cursorInputPos );
     updateDisplayFlag = false;
   }
-  menuPostProcessing();
+  
+  cursorPositionPostProcessing();  // set cursor to the right position after display update
 } // end of loop()
 //---------------------
 
 
-void menuPostProcessing(void) {
+void cursorPositionPostProcessing(void) { // set cursor to the right position after display update
   switch( menuState ) {
     case DEFAULT_SCREEN:     // Default state
-      if( defaultScreenFirstPass ) {
+      if( defaultScreenUpdateFlag ) {
         lcd.setCursor(0, 0);
         lcd.noCursor();
         lcd.blink();
-        defaultScreenFirstPass = false;
+        defaultScreenUpdateFlag = false;
       }
       break;
 
     case FREQUENCY_SETTING:    // Frequency setting
-      //Set the blinking cursor on the digit you currently modify
+      uint8_t pos;
       if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // binary '&' - that's correct!!! // thousands delimiter sign is ON
-        uint8_t pos = 11 - digitPos;
+        pos = FREQ_N_DIGITS+3 - digitPos;
         if( digitPos > 2 ) pos--; // skip place for separation point#1
         if( digitPos > 5 ) pos--; // skip place for separation point#2
-        lcd.setCursor( pos, 0 );
       } else {  // no separation points
-        lcd.setCursor( FREQ_N_DIGITS+1 - digitPos, 0 );
+        pos = FREQ_N_DIGITS+1 - digitPos;
       }
+      lcd.setCursor( pos, 0 );
       break;
 
 #ifdef  USE_PHASE // never tested
@@ -500,7 +507,7 @@ void processSingleClick(void) {
             
 #ifndef USE_PHASE          // If USE_PHASE has not been set
           case IP_CHANNEL: // select channel 0 or 1
-            settings.currentChannel = !settings.currentChannel; // flip bool value
+            settings.currentChannel = ! settings.currentChannel; // flip bool value
             setADchannel( settings.currentChannel );
             setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] ); 
             break;
@@ -512,16 +519,18 @@ void processSingleClick(void) {
             toggleCLKvolt( settings.toggleCLKoutVolt );
             break;
 #endif            
-          case IP_MODE: // Change the mode (sine/triangle/clock)
+          case IP_SIGNAL_MODE: // Change the signal mode (sine/triangle/clock)
             ++(*((uint8_t*)&(settings.currentMode[(uint8_t)settings.currentChannel])));  // increment currentMode value :-)
             if( settings.currentMode[(uint8_t)settings.currentChannel] == NUMBER_SIGMODES ) 
               settings.currentMode[(uint8_t)settings.currentChannel] = SIGMODE_SINE;
             // switch output to direct out
-            toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );
+            #ifdef ENABLE_VOUT_SWITCH
+              toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );
+            #endif
             setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] );
             break;
       } // switch( cursorInputPos )
-      updateDisplayFlag = true;  
+      updateDisplayFlag = true;
       break;
              
     case FREQUENCY_SETTING:  
@@ -556,14 +565,10 @@ void processSingleClick(void) {
 
 void processLongPress(void) {
   switch( menuState ) {
-  case DEFAULT_SCREEN: 
-    // do nothing
-    break;
-
   case SETTING_MENU:
     menuState = DEFAULT_SCREEN;
     cursorInputPos = IP_FREQUENCY;
-    defaultScreenFirstPass = true;
+    defaultScreenUpdateFlag = true;
     break;
 
 #ifdef  USE_PHASE // never tested
@@ -611,7 +616,7 @@ void processTripleClick(void) {
 //---------------------
 
 
-void setCursor2inputPosition( uint8_t _cursorPosition ) {
+void setCursor2inputPosition( const uint8_t _cursorPosition ) {
   // Move the cursor to display position in case it changed
     uint8_t realPosR = 0;
     uint8_t realPosC = settingInputPos[_cursorPosition];
@@ -625,7 +630,7 @@ void setCursor2inputPosition( uint8_t _cursorPosition ) {
 //---------------------
 
 
-void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
+void processEncoder( const RotaryEncoder::Direction _rotaryDirection ) {
   // Depending in which menu state you are the encoder will either change the value of a setting:
   //-+ frequency or it will change the cursor position
   switch( _rotaryDirection ) {
@@ -690,10 +695,9 @@ void processEncoder( RotaryEncoder::Direction _rotaryDirection ) {
       case PHASE_SETTING: {
           // if USE_PHASE has been defined, changes in the encoder will vary the phase value (upto 4096)
           // A better implementation would be to use increment of pi/4 or submultiples of pi where 2pi = 4096
-          unsigned long newPhase = phase + power(10, digitPos);
-          unsigned char dispDigit =
-            phase % power(10, digitPos + 1) / power(10, digitPos);
-          if(newPhase < maxPhase && dispDigit < PHASE_N_DIGITS+1) {
+          unsigned long newPhase  = phase + power(10, digitPos);
+          unsigned char dispDigit = phase % power(10, digitPos + 1) / power(10, digitPos);
+          if( newPhase < maxPhase && dispDigit < PHASE_N_DIGITS+1 ) {
             phase += power(10, digitPos);
             updateDisplayFlag = true;
           }
@@ -790,15 +794,20 @@ void displayFrequency( unsigned long _frequencyToDisplay ) {
   lcd.setCursor(0,0); 
   lcd.print( F("f=") );
   
-  uint8_t dispBuffer[FREQ_N_DIGITS] = {0,0,0,0,0,0,0,0};
+  uint8_t dispBuffer[FREQ_N_DIGITS]; // digits order is from the least significant to the most significant digit of frequency value
   uint8_t i;
+  
   for( i=0; i<FREQ_N_DIGITS; i++ ) {
     dispBuffer[i] = _frequencyToDisplay % 10;
     _frequencyToDisplay /= 10;
     if( _frequencyToDisplay == 0 ) break;
   }
-  // i now indicates the place of the last most significant meaningful digit 
+  // after performing the `break` command above i indicates the place of the last most significant meaningful digit in the freq value
   
+  // correct cursor input position in freq value to the most significant digit if it's happen to orfan at the left 
+  if( digitPos > i ) digitPos = i; 
+
+  // print freq value from left to right starting from the most significant digit
   for( int8_t j=FREQ_N_DIGITS-1; j >= 0; j-- ) {
     if( settings.displayFrequencyMode & NO_LEAD_ZERO_MASK ) { // hide leaading Zeros
       if( j>i ) {  // digits (zeros) before most significant digit in frequency value
@@ -821,7 +830,7 @@ void displayFrequency( unsigned long _frequencyToDisplay ) {
       if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  //  delimiter sign is ON
         if( j == 5 || j == 2 ) lcd.print( DELIMITER );
       }
-      lcd.print( dispBuffer[j] );
+      if( j>i ) lcd.print( '0' ); else lcd.print( dispBuffer[j] );   //lcd.print( dispBuffer[j] );  //try
     } // if() hide leaading Zeros
   } // for()
   lcd.print( F("Hz") );
@@ -830,14 +839,15 @@ void displayFrequency( unsigned long _frequencyToDisplay ) {
 
 
 // Function to display power state (ON/OFF) in the top right corner
-void displaySignalONOFF( bool _signalOn ) {
+void displaySignalONOFF( const bool _signalOn ) {
   #ifdef USE_PHASE
     lcd.setCursor(13, 0); 
     lcd.print( _signalOn ? F("ON ") : F("OFF") );
   #else
     if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // separation sign ON
       lcd.setCursor(15, 0);
-      lcd.print( _signalOn ? ONchar : OFFchar );
+      //lcd.print( _signalOn ? ONchar : OFFchar );  // same as below
+      if( _signalOn ) lcd.print( ONchar ); else lcd.print( OFFchar );
     } else {  // separation sign OFF
       lcd.setCursor(14, 0);
       lcd.print('O');
@@ -852,7 +862,7 @@ void displaySignalONOFF( bool _signalOn ) {
 
 
 // Function to display the mode in the bottom right corner
-void displaySignalMode( sigmode_t _currentMode ) {
+void displaySignalMode( const sigmode_t _currentMode ) {
   lcd.setCursor(13, 1);
 #ifdef GRAPH_ICONS
   switch( _currentMode ) {
@@ -888,7 +898,7 @@ void displayPhase( unsigned int _phaseToDisplay ) {
 
 
 // Function to display the FREQ register/Channel (either 0 or 1) in the bottom left corner
-void displayCurrentChannel( bool _channel ) {
+void displayCurrentChannel( const bool _channel ) {
   lcd.setCursor(0, 1);
   lcd.print( F("Ch#") );  // display channel as Ch#1 Ch#0 vs. old style CHAN1 CHAN0  
   lcd.print( (uint8_t)_channel );
@@ -896,7 +906,7 @@ void displayCurrentChannel( bool _channel ) {
 //---------------------
 
 
-void displayCLKoutVolt( bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
+void displayCLKoutVolt( const bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
   lcd.setCursor(6, 1);
 #ifdef ENABLE_MEANDRE05F_SIGMODE
   if( _currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F ) {
@@ -912,17 +922,15 @@ void displayCLKoutVolt( bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
 //---------------------
 
   
-void toggleCLKvolt( bool _toggleOutVolt ) {
+void toggleCLKvolt( const bool _toggleOutVolt ) {
  digitalWrite( TOGGLE_CLK_VOUT, _toggleOutVolt ? HIGH : LOW ); // HIGH = 5v, 3.3v
 }
 //---------------------
 
 
-unsigned long power( uint8_t a, uint8_t b ) {
-  unsigned long res;
-  if( b == 0 ) {
-    res = 1;
-  } else {
+unsigned long power( const uint8_t a, uint8_t b ) {
+  unsigned long res = 1;
+  if( b > 0 ) {
     res = a; b--;
     for( uint8_t i = 0; i < b; i++ ) res *= a;
   }
@@ -931,7 +939,7 @@ unsigned long power( uint8_t a, uint8_t b ) {
 //---------------------
 
 
-void setADsignalMode( sigmode_t _currentMode ) {
+void setADsignalMode( const sigmode_t _currentMode ) {
   switch( _currentMode ) {
   case SIGMODE_SINE:     sigGen.setModeSD( MD_AD9833::MODE_SINE ); break;
   case SIGMODE_TRIANGLE: sigGen.setModeSD( MD_AD9833::MODE_TRIANGLE ); break;
@@ -944,13 +952,13 @@ void setADsignalMode( sigmode_t _currentMode ) {
 //---------------------
 
 
-void setADfrequency( bool _channel, unsigned long _frequency ) {
+void setADfrequency( const bool _channel, const unsigned long _frequency ) {
   sigGen.setFrequency( _channel ? MD_AD9833::CHAN_1 : MD_AD9833::CHAN_0, _frequency );
 } // setADfrequency()
 //---------------------
 
 
-void setADchannel( bool _channel ) {
+void setADchannel( const bool _channel ) {
   if( _channel ) {
     sigGen.setActiveFrequency( MD_AD9833::CHAN_1 );
     frequency = settings.frequency[1];
@@ -963,7 +971,7 @@ void setADchannel( bool _channel ) {
 //---------------------
 
 
-void blinkDisplayBacklight( uint8_t nBlinks ) {
+void blinkDisplayBacklight( const uint8_t nBlinks ) {
   for( uint8_t i=0; i<nBlinks; i++ ) {
     lcd.noBacklight(); _delay_ms(300);
     lcd.backlight();   _delay_ms(300);
@@ -981,8 +989,6 @@ void applyCurrentSettings(void) {
 } // applyCurrentSettings()
 //---------------------
 
-
-#ifdef ENABLE_EEPROM
 
 bool readSettingsFromEEPROM(void) { // read settings from EEPROM; return true if CRC check sum is OK
   eeprom_read_block( (void *)&settings, EEPROM_ADDRESS_SHIFT, sizeof(settings_t) );  //eeprom_read_block (void *__dst, const void *__src, size_t __n);
@@ -1003,7 +1009,7 @@ void writeSettingsToEEPROM(void) { // write settings to EEPROM
 //---------------------
 
 
-uint8_t crc8array( uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 check sum for the memory block
+uint8_t crc8array( const uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 check sum for the memory block
   uint8_t checkSum = 0xFF;  // initial crc check sum value (see crc8 algorythm in Wikipedia)
 
   dataSize--; // decrease one time so that do not decrease it by 1 in the below for() checking the condition
@@ -1015,18 +1021,18 @@ uint8_t crc8array( uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 chec
 //---------------------
 
 
-uint8_t crc8update( uint8_t crc, uint8_t data ) {  // standard calculation from Wikipedia
+uint8_t crc8update( uint8_t crc, const uint8_t data ) {  // standard calculation from Wikipedia
   crc ^= data;
   for( uint8_t i = 0; i < 8; i++ ) 
-    crc = (crc & 0x80) ? (crc << 1)^0x31 : crc << 1;
+    crc = (crc & 0x80) ? (crc << 1)^0x31 : crc << 1;  // same as:  if( crc & 0x80 ) crc = (crc << 1)^0x31; else crc = crc << 1;
+    
   return crc;
 }  // crc8update()
-#endif
 //---------------------
 
 
 // under development
-void toggleOut( sigmode_t _currentMode ) {
+void toggleOut( const sigmode_t _currentMode ) {
 #ifdef ENABLE_MEANDRE05F_SIGMODE
   digitalWrite( TOGGLE_OUT, (_currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F) ? HIGH : LOW );
 #else
