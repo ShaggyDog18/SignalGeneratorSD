@@ -847,7 +847,7 @@ void displaySignalONOFF( const bool _signalOn ) {
     if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // separation sign ON
       lcd.setCursor(15, 0);
       //lcd.print( _signalOn ? ONchar : OFFchar );  // same as below
-      if( _signalOn ) lcd.print( ONchar ); else lcd.print( OFFchar );
+      if( _signalOn ) lcd.print( ONchar ); else lcd.print( OFFchar );  // more compact than the above line
     } else {  // separation sign OFF
       lcd.setCursor(14, 0);
       lcd.print('O');
