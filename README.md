@@ -106,7 +106,7 @@ Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awaila
 
 ## Compact Case
 
-Developed a compact case for the generator (see pictures), available at 
+Developed a compact case for the generator (see pictures), available at: 
 - Thingiverse  : https://www.thingiverse.com/thing:4552227
 - MyMiniFactory: https://www.myminifactory.com/object/3d-print-128983 
 
