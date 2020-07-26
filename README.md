@@ -104,6 +104,12 @@ To activate the feature in the firmware uncomment: `#define ENABLE_VOUT_SWITCH`
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awailable at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
 
+## Compact Case
+
+Developed a compact case for the generator (see pictures), available at 
+- Thingiverse  : https://www.thingiverse.com/thing:4552227
+- MyMiniFactory: https://www.myminifactory.com/object/3d-print-128983 
+
 ## Gratitude
 
 **If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/5USD)**
