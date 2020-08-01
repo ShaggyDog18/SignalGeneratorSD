@@ -38,7 +38,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 ## Hardware:
 
-- Any ATMega328P or ATMega168P chip based Arduino board (UNO, Nano, Pro Mini)
+- Any ATMega328P (tested) or ATMega168P (tested) chip based Arduino board (UNO, Nano, Pro Mini)
 - AD9833 Programmable Waveform Generator Module
 - LCD1602 Display with I2C Module
 - Rotary Encoder
@@ -154,12 +154,12 @@ Inhale new life into your Signal Generator! Enjoy!
 #define FSYNC_PIN  10
 
 // LCD Settings
-#define LCD_I2C_ADDRESS 0x3f	// 0x27 - alternative i2c address
+#define LCD_I2C_ADDRESS 0x3f	// 0x27  // 0x3f - alternative i2c address (blue screen module)
 #define LCD_DISP_COLS   16
 #define LCD_DISP_ROWS   2
 
-#define FREQ_N_DIGITS 8  // number of digits for frequency to display
-#define PHASE_N_DIGITS 4 // number of digits for phase to display
+#define FREQ_N_DIGITS  8  // number of digits for frequency to display
+#define PHASE_N_DIGITS 4  // number of digits for phase to display
 
 // --- Initialize hardware ---
 LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD Initialise
@@ -262,7 +262,7 @@ unsigned long frequency;
 uint8_t cursorInputPos = IP_FREQUENCY;
 
 #ifdef RUNNING_FREQUENCY 
-const unsigned long frequencyUpdateApplyDelay = 500UL;  // 0.5 sec delay between change in frequency value and its communication/application to AD9833 module; 
+const unsigned long frequencyUpdateApplyDelay = 400UL;  // 0.4 sec delay between change in frequency value and its communication/application to AD9833 module; 
                                                         // use delay to avoid every small freq value change to be communicated to the module; allow fast change in freq value without application
 unsigned long lastFrequencyUpdate;  // the most recent time in millis when the frequency value was updated
 #endif
@@ -355,7 +355,7 @@ void setup() {
     lcd.clear();
   }
 
-  if( ! digitalRead( BUTTON_OK ) || resetSettings ) { // if button is pressed at start up then all settings are reset to defaul
+  if( !digitalRead( BUTTON_OK ) || resetSettings ) { // if button is pressed at start up then all settings are reset to defaul
     lcdPrintResetMsg( 0 ); // print Reset message in line # 0
     settings.frequency[0] = settings.frequency[1] = 1000UL;
     settings.currentMode[0] = settings.currentMode[1] = SIGMODE_SINE;
@@ -371,8 +371,8 @@ void setup() {
 #endif
   
   // Set encoder pins as interrupts
-  attachInterrupt(digitalPinToInterrupt(DT),  encoderTickISR, CHANGE);
-  attachInterrupt(digitalPinToInterrupt(CLK), encoderTickISR, CHANGE);
+  attachInterrupt( digitalPinToInterrupt(DT),  encoderTickISR, CHANGE );
+  attachInterrupt( digitalPinToInterrupt(CLK), encoderTickISR, CHANGE );
 
   #ifdef ENABLE_VOUT_SWITCH
     // init pins and set them to default state 
@@ -469,8 +469,8 @@ void cursorPositionPostProcessing(void) { // set cursor to the right position af
       uint8_t pos;
       if( settings.displayFrequencyMode & THOUSANDS_DELIMITER_MASK ) {  // binary '&' - that's correct!!! // thousands delimiter sign is ON
         pos = FREQ_N_DIGITS+3 - digitPos;
-        if( digitPos > 2 ) pos--; // skip place for separation point#1
-        if( digitPos > 5 ) pos--; // skip place for separation point#2
+        if( digitPos > 2 ) pos--;  // skip place for separation point#1
+        if( digitPos > 5 ) pos--;  // skip place for separation point#2
       } else {  // no separation points
         pos = FREQ_N_DIGITS+1 - digitPos;
       }
