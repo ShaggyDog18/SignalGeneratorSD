@@ -43,7 +43,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Rotary Encoder
 - Schmitt-trigger 74LVC1G14 (optional)
 
-## Libraries:
+## Libraries
 
 Download and install all below libraries as regular libraries in your Arduino IDE environment (to the `Library` folder):
 
