@@ -1068,34 +1068,34 @@ void toggleOut( const sigmode_t _currentMode ) {
 //---------------------
 
 
-void steppedSweepGenerator( void ) {  // for Ch#0 only
-  lcd.blink();  //set blinking cursor to indicate that the steppedSweepGenerator mode ir running
+void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal settings: signal mode and amplitude setting for square wave
+  lcd.blink();  //blinking cursor to indicate that the steppedSweepGenerator mode is running
     
   bool goUp = false;
   if( settings.frequency[1] >= settings.frequency[0] ) goUp = true;
 
   uint8_t freqLog10;
   unsigned long _frequency = frequency;  
-  while( (goUp && _frequency < settings.frequency[1]) || (!goUp && _frequency > settings.frequency[1] ) ) {
+  while( (goUp && _frequency < settings.frequency[1]) || (!goUp && _frequency > settings.frequency[1] ) ) {  // while in a range
         
-    freqLog10 = (uint8_t)log10( _frequency );
-    if( freqLog10 > 0 ) freqLog10--;
+    freqLog10 = (uint8_t)log10( _frequency );  // magnitude/decimal power of the frequency value; to define logarithmic steps
+    if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the frequency step to imitate logarithmic increase/decrease; 0.1*frequency
     
     if( goUp ) 
-      _frequency += power(10, freqLog10 ); 
+      _frequency += power(10, freqLog10 ); // increase frequency value by 0.1*frequency
     else 
-      _frequency -= power(10, freqLog10 ); 
+      _frequency -= power(10, freqLog10 ); // decrease frequency value by 0.1*frequency
     
-    sigGen.setFrequency( MD_AD9833::CHAN_0, _frequency );
+    sigGen.setFrequency( MD_AD9833::CHAN_0, _frequency ); // set the frequency; frequency values defined in Ch#0 and Ch#1 are not altered
     
     displayFrequency( _frequency ); // update Frequency value on the display
     //setCursor2inputPosition( cursorInputPos );  // which is Channle Input  
     
-    if( !digitalRead( BUTTON_OK ) ) break;  
-    _delay_ms( STEPPED_SWEEP_DELAY );  
+    if( !digitalRead( BUTTON_OK ) ) break;  // press OK button to cancel the sweep cycle
+    _delay_ms( STEPPED_SWEEP_DELAY );  // delay between sweep steps
   }
-  frequencyUpdatedFlag = true;
-  updateDisplayFlag = true;
+  frequencyUpdatedFlag = true;  // get back fo Ch#0 settings
+  updateDisplayFlag = true;  // update the display
   _delay_ms( 3000 );  
-  lcd.noBlink();  // no blinking cursor
+  lcd.noBlink();  // stop blinking cursor - end of a sweep cycle
 }
