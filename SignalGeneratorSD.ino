@@ -1075,7 +1075,7 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
   if( settings.frequency[1] >= settings.frequency[0] ) goUp = true;
 
   uint8_t freqLog10;
-  unsigned long _frequency = frequency;  
+  unsigned long _frequency = frequency;  // equal to Ch#0 frequency value = start of the range
   while( (goUp && _frequency < settings.frequency[1]) || (!goUp && _frequency > settings.frequency[1] ) ) {  // while in a range
         
     freqLog10 = (uint8_t)log10( _frequency );  // magnitude/decimal power of the frequency value; to define logarithmic steps
