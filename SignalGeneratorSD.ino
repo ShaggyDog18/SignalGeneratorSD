@@ -1067,7 +1067,6 @@ void toggleOut( const sigmode_t _currentMode ) {
 }
 //---------------------
 
-
 void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal settings: signal mode and amplitude setting for square wave
   lcd.blink();  //blinking cursor to indicate that the steppedSweepGenerator mode is running
     
