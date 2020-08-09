@@ -1067,7 +1067,6 @@ void toggleOut( const sigmode_t _currentMode ) {
 }
 //---------------------
 
-
 void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal settings: signal mode and amplitude setting for square wave
   lcd.blink();  //blinking cursor to indicate that the steppedSweepGenerator mode is running
     
@@ -1075,21 +1074,20 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
   if( settings.frequency[1] >= settings.frequency[0] ) goUp = true;
 
   uint8_t freqLog10;
-  unsigned long _frequency = frequency;  // equal to Ch#0 frequency value = start of the range
-  while( (goUp && _frequency < settings.frequency[1]) || (!goUp && _frequency > settings.frequency[1] ) ) {  // while in a range
+  unsigned long _sweepFrequency = settings.frequency[0];  // Ch#0 frequency value = start of the sweep range
+  while( (goUp && _sweepFrequency < settings.frequency[1]) || (!goUp && _sweepFrequency > settings.frequency[1] ) ) {  // while in a range
         
-    freqLog10 = (uint8_t)log10( _frequency );  // magnitude/decimal power of the frequency value; to define logarithmic steps
-    if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the frequency step to imitate logarithmic increase/decrease; 0.1*frequency
+    freqLog10 = (uint8_t)log10( _sweepFrequency );  // magnitude/decimal power of the sweep frequency value; used to define logarithmic steps
+    if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the sweep step to imitate logarithmic increase/decrease as 0.1*sweepFrequency
     
     if( goUp ) 
-      _frequency += power(10, freqLog10 ); // increase frequency value by 0.1*frequency
+      _sweepFrequency += power(10, freqLog10 ); // increase frequency value by 0.1*frequency
     else 
-      _frequency -= power(10, freqLog10 ); // decrease frequency value by 0.1*frequency
+      _sweepFrequency -= power(10, freqLog10 ); // decrease frequency value by 0.1*frequency
     
-    sigGen.setFrequency( MD_AD9833::CHAN_0, _frequency ); // set the frequency; frequency values defined in Ch#0 and Ch#1 are not altered
+    sigGen.setFrequency( MD_AD9833::CHAN_0, _sweepFrequency ); // set the sweep frequency; frequency values defined in Ch#0 and Ch#1 are not altered
     
-    displayFrequency( _frequency ); // update Frequency value on the display
-    //setCursor2inputPosition( cursorInputPos );  // which is Channle Input  
+    displayFrequency( _sweepFrequency ); // update Frequency value on the display
     
     if( !digitalRead( BUTTON_OK ) ) break;  // press OK button to cancel the sweep cycle
     _delay_ms( STEPPED_SWEEP_DELAY );  // delay between sweep steps
