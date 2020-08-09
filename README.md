@@ -92,7 +92,7 @@ The thousands delimiter is different from country to country. In the United Stat
 
 - Press and hold button during start up -> reset settings to default (just for the current session, does not write default settings to EEPROM).
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
-- Double click anywhere except input frequency -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
+- Double click anywhere except input frequency and Ch#0 -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
 - At the first launch of the firmware `Error:CRC EEPROM` will be shown because no settings are in the EEPROM yet. Settings will be automatically set to default and saved to EEPROM. The error will not appear any more.
 
 ## Squarewave Signal Amplitude Feature
