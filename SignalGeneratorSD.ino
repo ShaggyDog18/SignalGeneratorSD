@@ -17,22 +17,26 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 ## Change Log:
 
-- Use **MD_A9833**(modified) library to control the AD9833 Module: compact and bug-free library with great functions.
+- Use **MD_AD9833**(modified) library to control the AD9833 Module: compact and bug-free library with great functions.
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
 - Improved navigation, essentially, coded from scratch (see Navigation section below).
-- **NEW** Improved the way frequency value is displayed (coded from scratch): 
+- Improved the way frequency value is displayed (coded from scratch): 
   - option to hide leading zeros in frequency value (toggled by triple click of encoder button).
   - option to delimit thousands by a separation sign (toggled by triple click to encoder button). 
   - a selected option (one out of four possible combinations) is stored to EEPROM (if enabled) and is set at start up.
-- **NEW** Use EEPROM to store and recover settings at switch on (to disable comment `#define ENABLE_EEPROM`).  
-- **NEW** Added graphic icons for signal form representation on the display (if you still like the old way, comment `#define GRAPH_ICONS`). 
-- **NEW** Tied a signal mode to a Channel; so, now you may change signal form along with its frequency by selecting a channel.
-- **NEW** Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module. Comment `#define ENABLE_MEANDRE05F_SIGMODE` if you do not need it.
-- **NEW** More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
+- Use EEPROM to store and recover settings at switch on (to disable comment `#define ENABLE_EEPROM`).  
+- Added graphic icons for signal form representation on the display (if you still like the old way, comment `#define GRAPH_ICONS`). 
+- Tied a signal mode to a Channel; so, now you may change signal form along with its frequency by selecting a channel.
+- Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module. Comment `#define ENABLE_MEANDRE05F_SIGMODE` if you do not need it.
+- More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
-  - **NEW** "Running" frequency - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
-- Renamed FREQuency register on the display to Channel: so, now it looks like Ch#0 and Ch#1.
+  - **NEW** "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
+- **NEW** - `Stepped Sweep Generator`: the frequency is varied in a range defined by values set in Ch#0 (start of the range) and Ch#1 (end of the range) with signal settings of Ch#0 and discrete steps of 0,1 of a current running frequency (kind of logarithmical steps).
+Frequency value steps either up or down from the start of the range depends on what channels' frequency is larger. Frequency is changed discretely every 250 mSec (can be changed at compilation). 
+The running `Stepped Sweep Generator` cycle is indicated by a blinking cursor at the end of a frequency value. Can be activated for Ch#0 only and uses its signal settings. 
+While running, can be cancelled by short press and hold of OK button. When the end of the range is reached, it pauses for 3 sec and switches back to Ch#0 settings. 
+Sweep generators are commonly used to test the frequency response of electronic filter circuits. Read more about [Sweep Generator in Wikipedia](https://en.wikipedia.org/wiki/Sweep_generator)
 
 **Note**: I’ve never used/tested a PHASE option... Use it at your risk...
 
@@ -60,6 +64,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convenient  way of input frequency by encoder; if you like the old way - comment it!
 - **NEW** `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
+- **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. 
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
@@ -81,12 +86,15 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
 The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. 
 So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
+- **NEW** `Stepped Sweep Generator` feature:
+  - Double click in SETTING_MODE while in channel Ch#0 position -> initiate the `Stepped Sweep Generator` feature; runs one cycle of a frequency variation.
+  - Single click or click and hold -> cancel a `Stepped Sweep Generator` sweep cycle.  
 
 #### If EEPROM is enabled:
 
 - Press and hold button during start up -> reset settings to default (just for the current session, does not write default settings to EEPROM).
 Hold the button until display's backlight starts blinking. Backlight will blink 3 times to confirm the reset.   
-- Double click anywhere except input frequency -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
+- Double click anywhere except input frequency and Ch#0 -> save settings to EEPROM. Display backlight will blink 2 times to confirm.
 - At the first launch of the firmware `Error:CRC EEPROM` will be shown because no settings are in the EEPROM yet. Settings will be automatically set to default and saved to EEPROM. The error will not appear any more.
 
 ## Squarewave Signal Amplitude Feature
@@ -116,17 +124,22 @@ Inhale new life into your Signal Generator! Enjoy!
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only; if you do not need it - comment!
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
-#define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.5 sec delay. The new frequency value is applied in 0.5 sec after your input is complete.
+#define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.4 sec delay. The new frequency value is applied in 0.4 sec after your input is complete.
 #define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
+#define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
 // ------------------------
 
 //Check up and correct Compiler Configuration
+#if defined( STEPPED_SWEEP_GENERATOR ) && !defined( RUNNING_FREQUENCY )
+  #define RUNNING_FREQUENCY
+#endif
 #if defined( RUNNING_FREQUENCY ) && !defined( NEW_WAY_INPUT_FREQ )
   #define NEW_WAY_INPUT_FREQ  // Runing frequency works in the NEW_WAY_INPUT_FREQ only!
 #endif
+
 //-------------------------
 
 // --- INCLUDE SECTION ---
@@ -265,6 +278,10 @@ uint8_t cursorInputPos = IP_FREQUENCY;
 const unsigned long frequencyUpdateApplyDelay = 400UL;  // 0.4 sec delay between change in frequency value and its communication/application to AD9833 module; 
                                                         // use delay to avoid every small freq value change to be communicated to the module; allow fast change in freq value without application
 unsigned long lastFrequencyUpdate;  // the most recent time in millis when the frequency value was updated
+#endif
+
+#ifdef STEPPED_SWEEP_GENERATOR  // very frequency in a range defined by frequencies set in Ch#0 and Ch#1 with a step of 0,1 of current frequency with signal settings in Ch#0
+const unsigned long STEPPED_SWEEP_DELAY = 250UL;
 #endif
 
 #ifndef GRAPH_ICONS
@@ -595,7 +612,15 @@ void processDoubleClick(void) {
   case FREQUENCY_SETTING: 
     if( digitPos > 0 ) digitPos--;
     break;
-    
+
+#ifdef STEPPED_SWEEP_GENERATOR
+  case SETTING_MENU:
+    if( cursorInputPos == IP_CHANNEL && !settings.currentChannel ) { // for Ch#0 only;
+      steppedSweepGenerator();
+    }
+    break;
+#endif
+      
 #ifdef ENABLE_EEPROM     
   default: 
     writeSettingsToEEPROM();
@@ -1041,3 +1066,36 @@ void toggleOut( const sigmode_t _currentMode ) {
   _delay_ms(100);
 }
 //---------------------
+
+
+void steppedSweepGenerator( void ) {  // for Ch#0 only
+  lcd.blink();  //set blinking cursor to indicate that the steppedSweepGenerator mode ir running
+    
+  bool goUp = false;
+  if( settings.frequency[1] >= settings.frequency[0] ) goUp = true;
+
+  uint8_t freqLog10;
+  unsigned long _frequency = frequency;  
+  while( (goUp && _frequency < settings.frequency[1]) || (!goUp && _frequency > settings.frequency[1] ) ) {
+        
+    freqLog10 = (uint8_t)log10( _frequency );
+    if( freqLog10 > 0 ) freqLog10--;
+    
+    if( goUp ) 
+      _frequency += power(10, freqLog10 ); 
+    else 
+      _frequency -= power(10, freqLog10 ); 
+    
+    sigGen.setFrequency( MD_AD9833::CHAN_0, _frequency );
+    
+    displayFrequency( _frequency ); // update Frequency value on the display
+    //setCursor2inputPosition( cursorInputPos );  // which is Channle Input  
+    
+    if( !digitalRead( BUTTON_OK ) ) break;  
+    _delay_ms( STEPPED_SWEEP_DELAY );  
+  }
+  frequencyUpdatedFlag = true;
+  updateDisplayFlag = true;
+  _delay_ms( 3000 );  
+  lcd.noBlink();  // no blinking cursor
+}
