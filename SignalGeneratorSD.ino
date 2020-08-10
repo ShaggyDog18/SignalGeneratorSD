@@ -1077,11 +1077,12 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
 
   uint8_t freqLog10;
   unsigned long sweepFrequency = settings.frequency[0];  // Ch#0 frequency value => start of the sweep range
+  
   while( (goUp && sweepFrequency < settings.frequency[1]) || (!goUp && sweepFrequency > settings.frequency[1]) ) {  // while in a sweep range
-        
+    
     freqLog10 = (uint8_t)log10( sweepFrequency );  // magnitude/decimal power of the sweep frequency value; used to define logarithmic steps
     if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the sweep step to imitate logarithmic increase/decrease as 0.1*sweepFrequency
-    
+
     if( goUp ) 
       sweepFrequency += power(10, freqLog10 ); // increase frequency value by 0.1*frequency
     else 
