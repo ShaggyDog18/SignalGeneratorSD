@@ -1098,5 +1098,7 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
   frequencyUpdatedFlag = true;  // get back fo Ch#0 settings
   updateDisplayFlag = true;  // update the display
   _delay_ms( 3000 );  
+  lcd.setCursor(4, 1);
+  lcd.print( ' ' );  // clean the last letter f the "Sweep" word on the display
   lcd.noBlink();  // stop blinking cursor - end of the sweep cycle
 }
