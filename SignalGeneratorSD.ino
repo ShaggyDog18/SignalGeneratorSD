@@ -1079,7 +1079,6 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
   unsigned long sweepFrequency = settings.frequency[0];  // Ch#0 frequency value => start of the sweep range
   
   while( (goUp && sweepFrequency < settings.frequency[1]) || (!goUp && sweepFrequency > settings.frequency[1]) ) {  // while in a sweep range
-    
     freqLog10 = (uint8_t)log10( sweepFrequency );  // magnitude/decimal power of the sweep frequency value; used to define logarithmic steps
     if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the sweep step to imitate logarithmic increase/decrease as 0.1*sweepFrequency
 
@@ -1101,4 +1100,5 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
   lcd.setCursor(4, 1);
   lcd.print( ' ' );  // clean the last letter of the "Sweep" word on the display
   lcd.noBlink();  // stop blinking cursor - end of the sweep cycle
-}
+}  // steppedSweepGenerator()
+//---------------------
