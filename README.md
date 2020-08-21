@@ -78,7 +78,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
   - Double click -> jump to the right to less significant  number.
   - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
-  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your input is completet.
+  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Single click at active input parameter -> change parameter's value. The new value is immediately applied.
 - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
