@@ -129,7 +129,7 @@ Inhale new life into your Signal Generator! Enjoy!
 #define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
 #define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
-//#define USE_PHASE    //Uncomment the line below if you want to change the Phase instead of the FREQ register // never use or tested
+//#define USE_PHASE    //Uncomment if you want to change the Phase instead of the FREQ register // never use nor tested
 // ------------------------
 
 //Check up and correct Compiler Configuration
@@ -384,7 +384,7 @@ void setup() {
     while( !digitalRead( BUTTON_OK ) ) ; // wait for button to be released
     lcd.clear();
   }
-  if( resetSettings) writeSettingsToEEPROM();
+  if( resetSettings ) writeSettingsToEEPROM();
 #endif
   
   // Set encoder pins as interrupts
@@ -931,7 +931,7 @@ void displayCurrentChannel( const bool _channel ) {
 //---------------------
 
 
-void displayCLKoutVolt( const bool _toggleCLKoutVolt, sigmode_t _currentMode ) {
+void displayCLKoutVolt( const bool _toggleCLKoutVolt, const sigmode_t _currentMode ) {
   lcd.setCursor(6, 1);
 #ifdef ENABLE_MEANDRE05F_SIGMODE
   if( _currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F ) {
