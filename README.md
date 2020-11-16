@@ -121,4 +121,4 @@ Developed a compact case for the generator (see pictures), available at:
 
 **If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/5USD)**
 
-Inhale new life into your Signal Generator! Enjoy!
+Inhale a new life into your Signal Generator! Enjoy!
