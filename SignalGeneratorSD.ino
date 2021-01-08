@@ -241,6 +241,7 @@ const char DELIMITER = 0b00100111; // regular apostrophe sign '
 //const char DELIMITER = ' ';      // space for Sweeden
 
 // Settings structure to keep all settings together in one structure and store it in EEPROM "at once", size of 14 bytes
+#pragma pack(1)
 struct settings_t {
   unsigned long frequency[2]; 
   sigmode_t currentMode[2]; // uint8_t type
@@ -1018,7 +1019,7 @@ void applyCurrentSettings(void) {
 bool readSettingsFromEEPROM(void) { // read settings from EEPROM; return true if CRC check sum is OK
   eeprom_read_block( (void *)&settings, EEPROM_ADDRESS_SHIFT, sizeof(settings_t) );  //eeprom_read_block (void *__dst, const void *__src, size_t __n);
   // check the CRC8 chech sum of the memory block read from EEPROM
-  uint8_t checkSum = crc8array( (uint8_t *) &settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
+  uint8_t checkSum = crc8block( (uint8_t *) &settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
   if( checkSum == settings.checkSum ) return true;
   return false;
 } // readSettingsFromEEPROM()
@@ -1027,33 +1028,35 @@ bool readSettingsFromEEPROM(void) { // read settings from EEPROM; return true if
 
 void writeSettingsToEEPROM(void) { // write settings to EEPROM
   // calculate the CRC8 chech sum of settings structure and write it to EEPROM along with settings
-  uint8_t checkSum = crc8array( (uint8_t *)&settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
+  uint8_t checkSum = crc8block( (uint8_t *)&settings, sizeof(settings_t)-1 ); // last array member is a byte of the CRC check sum, so passing one less byte
   settings.checkSum = checkSum;
   eeprom_update_block( (void *)&settings, EEPROM_ADDRESS_SHIFT, sizeof(settings_t) );   // write settings to EEPROM: eeprom_update_block(const void *__src, void *__dst, size_t __n)
 } // writeSettingsToEEPROM()
 //---------------------
 
 
-uint8_t crc8array( const uint8_t data[], uint8_t dataSize ) {   // calculate CRC8 check sum for the memory block
-  uint8_t checkSum = 0xFF;  // initial crc check sum value (see crc8 algorythm in Wikipedia)
+// source: https://ru.wikibooks.org/wiki/%D0%A0%D0%B5%D0%B0%D0%BB%D0%B8%D0%B7%D0%B0%D1%86%D0%B8%D0%B8_%D0%B0%D0%BB%D0%B3%D0%BE%D1%80%D0%B8%D1%82%D0%BC%D0%BE%D0%B2/%D0%A6%D0%B8%D0%BA%D0%BB%D0%B8%D1%87%D0%B5%D1%81%D0%BA%D0%B8%D0%B9_%D0%B8%D0%B7%D0%B1%D1%8B%D1%82%D0%BE%D1%87%D0%BD%D1%8B%D0%B9_%D0%BA%D0%BE%D0%B4
+/*
+  Name  : CRC-8
+  Poly  : 0x31    x^8 + x^5 + x^4 + 1
+  Init  : 0xFF
+  Revert: false
+  XorOut: 0x00
+  Check : 0xF7 ("123456789")
+  MaxLen: 15 байт(127 бит) - обнаружение
+    одинарных, двойных, тройных и всех нечетных ошибок
+*/
+unsigned char crc8block(unsigned char *pcBlock, uint16_t len) {
+    unsigned char crc = 0xFF;
+    uint8_t i;
 
-  dataSize--; // decrease one time so that do not decrease it by 1 in the below for() checking the condition
-  for( uint8_t i=0; i < dataSize; i++ ) {  // CRC8 for all bytes in the memory block
-    checkSum = crc8update( checkSum, data[i] );  
-  }
-  return checkSum;
-} //crc8array()
-//---------------------
-
-
-uint8_t crc8update( uint8_t crc, const uint8_t data ) {  // standard calculation from Wikipedia
-  crc ^= data;
-  for( uint8_t i = 0; i < 8; i++ ) 
-    crc = (crc & 0x80) ? (crc << 1)^0x31 : crc << 1;  // same as:  if( crc & 0x80 ) crc = (crc << 1)^0x31; else crc = crc << 1;
-    
-  return crc;
-}  // crc8update()
-//---------------------
+    while( len-- ) {
+        crc ^= *pcBlock++;
+        for( i = 0; i < 8; i++ )
+            crc = (crc & 0x80) ? (crc << 1)^0x31 : crc << 1;
+    }
+    return crc;
+}
 
 
 // under development
