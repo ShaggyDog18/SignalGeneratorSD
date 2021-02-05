@@ -133,7 +133,7 @@ Inhale a new life into your Signal Generator! Enjoy!
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only; if you do not need it - comment!
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
 #define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.4 sec delay. The new frequency value is applied in 0.4 sec after your input is complete.
-#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
+//#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
 #define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
 #define ENABLE_WATCHDOG          // size encresed to 11092/452 vs 11038/452 bytes
