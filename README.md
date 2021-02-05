@@ -1,6 +1,6 @@
 # SignalGeneratorSD based on AD9833 Module
 
-by **ShaggyDog18@gmail.com**, June-July 2020
+by **ShaggyDog18@gmail.com**, June-July 2020, FEB-2021
 
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
@@ -53,7 +53,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 - **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functioning  of ON / OFF functions)
 - **RotaryEncoder** (modified): https://github.com/ShaggyDog18/RotaryEncoder
-- **GyverButton**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
+- **OneButton**: https://github.com/ShaggyDog18/OneButton 
 - **LCD1602 I2C**: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 
 ## Compile Options/Firmware Configuration:
@@ -69,19 +69,22 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
+- `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out. 
 
 ## Improved Navigation:
 
-- Single button click at the default operation screen -> go to SETTING_MODE.
+- default Operation Screen:
+  - Single button click -> go to SETTING_MODE.
+  - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
 - Input frequency value:
-  - Single click -> jump to the left to more significant  number.
-  - Double click -> jump to the right to less significant  number.
+  - Single click -> jump to the left to more significant number.
+  - Double click -> jump to the right to less significant number.
   - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
   - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Single click at active input parameter -> change parameter's value. The new value is immediately applied.
-- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
+- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
 - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
 The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
 - **NEW** `Stepped Sweep Generator` feature:

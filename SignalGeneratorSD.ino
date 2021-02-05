@@ -1,7 +1,7 @@
 /*=================== Signal Generator -SD mod- based on AD9833 Module
 # SignalGeneratorSD based on AD9833 Module
 
-by **ShaggyDog18@gmail.com**, June-July 2020
+by **ShaggyDog18@gmail.com**, June-July 2020, FEB-2021
 
 github: https://github.com/ShaggyDog18/SignalGeneratorSD
 
@@ -11,9 +11,9 @@ Original firmware and hardware solution/schematic by: **Cezar Chirila**;
 URL: https://www.allaboutcircuits.com/projects/how-to-DIY-waveform-generator-analog-devices-ad9833-ATmega328p/
 
 Also, the project was promoted by **GreatScott** with some simplified schematic: https://www.instructables.com/id/DIY-FunctionWaveform-Generator/; 
-https://www.youtube.com/watch?v=Y1KE8eAC9Bk 
+https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
-**If you like the new look and feel of SignalGeneratorSD, please, consider making a small donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
+**If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/5USD)**
 
 ## Change Log:
 
@@ -32,7 +32,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   - **NEW** "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
-- **NEW** - `Stepped Sweep Generator`: the frequency is varied in a range defined by values set in Ch#0 (start of the range) and Ch#1 (end of the range) with signal settings of Ch#0 and discrete steps of 0,1 of a current running frequency (kind of logarithmical steps).
+- **NEW** - `Stepped Sweep Generator`: the frequency is varied in a range defined by values set in Ch#0 (start of the range) and Ch#1 (end of the range) with signal settings of Ch#0 and discrete steps of 0,1 of a current running frequency (kind of logarithmic steps).
 Frequency value steps either up or down from the start of the range depends on what channels' frequency is larger. Frequency is changed discretely every 250 mSec (can be changed at compilation). 
 The running `Stepped Sweep Generator` cycle is indicated by a blinking cursor at the end of a frequency value. Can be activated for Ch#0 only and uses its signal settings. 
 While running, can be cancelled by short press and hold of OK button. When the end of the range is reached, it pauses for 3 sec and switches back to Ch#0 settings. 
@@ -54,7 +54,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 - **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functioning  of ON / OFF functions)
 - **RotaryEncoder** (modified): https://github.com/ShaggyDog18/RotaryEncoder
-- **GyverButton**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverButton
+- **OneButton**: https://github.com/ShaggyDog18/OneButton 
 - **LCD1602 I2C**: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
 
 ## Compile Options/Firmware Configuration:
@@ -64,28 +64,30 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 - `#define NEW_WAY_INPUT_FREQ` - new faster and more convenient  way of input frequency by encoder; if you like the old way - comment it!
 - **NEW** `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
-- **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. 
+- **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency.
 - `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
 - `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
+- `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out.
 
 ## Improved Navigation:
 
-- Single button click at the default operation screen -> go to SETTING_MODE.
+- default Operation Screen:
+  - Single button click -> go to SETTING_MODE.
+  - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
 - Input frequency value:
-  - Single click -> jump to the left to more significant  number.
-  - Double click -> jump to the right to less significant  number.
+  - Single click -> jump to the left to more significant number.
+  - Double click -> jump to the right to less significant number.
   - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
-  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your input is completet.
+  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
 - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
 - Single click at active input parameter -> change parameter's value. The new value is immediately applied.
-- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to operation screen (blinking cursor at the "f=" letter).
+- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
 - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
-The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. 
-So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
+The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
 - **NEW** `Stepped Sweep Generator` feature:
   - Double click in SETTING_MODE while in channel Ch#0 position -> initiate the `Stepped Sweep Generator` feature; runs one cycle of a frequency variation.
   - Single click or click and hold -> cancel a `Stepped Sweep Generator` sweep cycle.  
@@ -99,8 +101,7 @@ Hold the button until display's backlight starts blinking. Backlight will blink 
 
 ## Squarewave Signal Amplitude Feature
 
-AD98333 module generates meandre (squarewave signal) at its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave sugnal is +5v. 
-In some cases a signal of +3.3v TTL may be required. 
+The AD98333 module generates meandre (squarewave signal) with amplitude equal to its VCC level. So, if VCC bus is +5v, then the amplitude of the squarewave sugnal is +5v. In some cases a signal of +3.3v TTL may be required.
 
 There are several solutions:
 1. use +3.3v power bus for entire solution (will not have +5v output squarewave signal then).
@@ -114,10 +115,17 @@ To activate the feature in the firmware uncomment: `#define ENABLE_VOUT_SWITCH`
 
 Schematic of the "ouput buffer" based on the Schmitt-trigger 74LVC1G14 is awailable at [EasyEDA](https://easyeda.com/Sergiy/switch-5-3-3v-power-bus)
 
-Inhale new life into your Signal Generator! Enjoy!
+## Compact Case
 
-**If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/4USD)**
+Developed a compact case for the generator (see pictures), available at: 
+- Thingiverse  : https://www.thingiverse.com/thing:4552227
+- MyMiniFactory: https://www.myminifactory.com/object/3d-print-128983 
 
+## Gratitude
+
+**If you like the new look and feel of SignalGeneratorSD, please, consider making a small "cup of coffee" donation using [PayPal](https://paypal.me/shaggyDog18/5USD)**
+
+Inhale a new life into your Signal Generator! Enjoy!
 */
 // --- COMPILER CONFIG ----
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
@@ -128,8 +136,10 @@ Inhale new life into your Signal Generator! Enjoy!
 #define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
 #define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
+#define ENABLE_WATCHDOG          // size encresed to 11092/452 vs 11038/452 bytes
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment if you want to change the Phase instead of the FREQ register // never use nor tested
+
 // ------------------------
 
 //Check up and correct Compiler Configuration
@@ -146,10 +156,13 @@ Inhale new life into your Signal Generator! Enjoy!
 #include <avr/delay.h>
 #include <LiquidCrystal_I2C.h>
 #include <RotaryEncoder.h>
-#include <GyverButton.h>
+#include <OneButton.h>
 #include <MD_AD9833.h>  // modified library. Midifications are commented with ShaggyDog keyword
 #ifdef ENABLE_EEPROM
   #include <avr/eeprom.h>
+#endif
+#ifdef ENABLE_WATCHDOG
+  #include <GyverWDT.h>
 #endif
 // ------------------------
 
@@ -177,7 +190,7 @@ Inhale new life into your Signal Generator! Enjoy!
 // --- Initialize hardware ---
 LiquidCrystal_I2C lcd( LCD_I2C_ADDRESS, LCD_DISP_COLS, LCD_DISP_ROWS ); // LCD Initialise
 RotaryEncoder encoder( DT, CLK );  // initialise the encoder on pins 2 and 3 (interrupt pins)
-GButton buttonOK( BUTTON_OK );     // initialize Encoder Button
+OneButton buttonOK( BUTTON_OK );   // initialize Encoder Button
 MD_AD9833 sigGen( FSYNC_PIN );     // initialize AS9833 module, connected to hardware SPI
 
 // Variables used to position cursor for data input and walk through menu
@@ -329,7 +342,7 @@ const uint8_t triangle[2][8] = {
 void setup() {
   // Initialise the LCD, start the backlight and print a "bootup" message
   lcd.begin();
-
+  
    // create graphic signs
 #ifdef USE_PHASE  
   lcd.createChar(0, phi); // Custom graphic PHI char for LCD
@@ -348,6 +361,11 @@ void setup() {
   lcd.createChar(6, triangle[1]); // Custom graphic triangle 3/3 char for LCD
 //  lcd.createChar(7, vacant); // Custom graphic - vacant position
 #endif  
+
+  buttonOK.attachClick( processSingleClick ); // single click
+  buttonOK.attachLongPressStart( processLongPress );   // long press
+  buttonOK.attachDoubleClick( processDoubleClick ); // double click
+  buttonOK.attachMultiClick( processTripleClick ); // tripple click
 
   // Launch Screen
   lcd.home();
@@ -403,6 +421,10 @@ void setup() {
 
   // Clear the screen
   lcd.clear();
+
+  #ifdef ENABLE_WATCHDOG
+    Watchdog.enable(RESET_MODE, WDT_PRESCALER_256); // timeout 2sec
+  #endif
 } // end of setup()
 //---------------------------
 
@@ -427,12 +449,7 @@ void encoderTickISR(void) {
 //---------------------
 void loop() {
   buttonOK.tick();   // Check if encoder button has been pressed
-  // process button clicks
-  if( buttonOK.isSingle() ) processSingleClick(); // single click
-  if( buttonOK.isHolded() ) processLongPress();   // long press
-  if( buttonOK.isDouble() ) processDoubleClick(); // double click
-  if( buttonOK.isTriple() ) processTripleClick(); // tripple click
-  
+
   processEncoder( encoder.getDirection() );  
 
   #ifdef RUNNING_FREQUENCY 
@@ -468,6 +485,10 @@ void loop() {
   }
   
   cursorPositionPostProcessing();  // set cursor to the right position after display update
+
+  #ifdef ENABLE_WATCHDOG
+    Watchdog.reset(); // Reset watchdog, means loop() is operating OK... 
+  #endif 
 } // end of loop()
 //---------------------
 
@@ -634,8 +655,9 @@ void processDoubleClick(void) {
 
 void processTripleClick(void) {
   settings.displayFrequencyMode++;
-  if( settings.displayFrequencyMode == NUMBER_FREQUENCY_DISPLAY_MODES ) 
-    settings.displayFrequencyMode = 0;  // LEAD_ZERO_and_NO_DELIMITER
+  settings.displayFrequencyMode %= NUMBER_FREQUENCY_DISPLAY_MODES;  // same as below 2 lines
+  //if( settings.displayFrequencyMode == NUMBER_FREQUENCY_DISPLAY_MODES ) 
+  //  settings.displayFrequencyMode = 0;  // LEAD_ZERO_and_NO_DELIMITER
   updateDisplayFlag = true;
   lcd.clear();
 }  // processTripleClick()
@@ -1043,8 +1065,7 @@ void writeSettingsToEEPROM(void) { // write settings to EEPROM
   Revert: false
   XorOut: 0x00
   Check : 0xF7 ("123456789")
-  MaxLen: 15 байт(127 бит) - обнаружение
-    одинарных, двойных, тройных и всех нечетных ошибок
+  MaxLen: 15 bytes (127 бит)
 */
 unsigned char crc8block(unsigned char *pcBlock, uint16_t len) {
     unsigned char crc = 0xFF;
@@ -1080,7 +1101,7 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
 
   uint8_t freqLog10;
   unsigned long sweepFrequency = settings.frequency[0];  // Ch#0 frequency value => start of the sweep range
-  
+
   while( (goUp && sweepFrequency < settings.frequency[1]) || (!goUp && sweepFrequency > settings.frequency[1]) ) {  // while in a sweep range
     freqLog10 = (uint8_t)log10( sweepFrequency );  // magnitude/decimal power of the sweep frequency value; used to define logarithmic steps
     if( freqLog10 > 0 ) freqLog10--;  // define the power of 10 for the sweep step to imitate logarithmic increase/decrease as 0.1*sweepFrequency
@@ -1095,13 +1116,26 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
     displayFrequency( sweepFrequency ); // update Frequency value on the display
     
     if( !digitalRead( BUTTON_OK ) ) break;  // press OK button to cancel the sweep cycle
-    _delay_ms( STEPPED_SWEEP_DELAY );  // delay between sweep steps
+    _delay_ms( STEPPED_SWEEP_DELAY );  // delay between sweep steps 250 msec
+
+    //re-set Watchdog
+    #ifdef ENABLE_WATCHDOG
+      Watchdog.reset(); // while() is performing OK
+    #endif 
   }
   frequencyUpdatedFlag = true;  // get back fo Ch#0 settings
   updateDisplayFlag = true;  // update the display
+  #ifdef ENABLE_WATCHDOG
+    Watchdog.disable();
+  #endif
   _delay_ms( 3000 );  
   lcd.setCursor(4, 1);
   lcd.print( ' ' );  // clean the last letter of the "Sweep" word on the display
   lcd.noBlink();  // stop blinking cursor - end of the sweep cycle
+
+  // set the initial Watchdog settings
+  #ifdef ENABLE_WATCHDOG
+    Watchdog.enable(RESET_MODE, WDT_PRESCALER_256);  // 2sec
+  #endif 
 }  // steppedSweepGenerator()
 //---------------------
