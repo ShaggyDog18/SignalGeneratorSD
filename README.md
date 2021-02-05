@@ -69,7 +69,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
-- `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out. 
+- **NEW** `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out. 
 
 ## Improved Navigation:
 
