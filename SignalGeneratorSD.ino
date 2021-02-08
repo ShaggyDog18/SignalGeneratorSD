@@ -70,7 +70,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
-- `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out.
+- **NEW**`#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out.
 
 ## Improved Navigation:
 
@@ -134,7 +134,7 @@ Inhale a new life into your Signal Generator! Enjoy!
 #define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
 #define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.4 sec delay. The new frequency value is applied in 0.4 sec after your input is complete.
 //#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
-#define EEPROM_ADDRESS_SHIFT 0  // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
+#define EEPROM_ADDRESS_SHIFT 0x00 // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
 #define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
 #define ENABLE_WATCHDOG          // size encresed to 11092/452 vs 11038/452 bytes
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
@@ -176,7 +176,7 @@ Inhale a new life into your Signal Generator! Enjoy!
 
 #define BUTTON_OK  4
 #define TOGGLE_OUT 5      // switch the out off if toggle to Meandre/CLK which is 5V out to protect the output from saturation (under development)
-#define TOGGLE_CLK_VOUT 6 // switch output sine voltage between 3.3v (default) and 5v 
+#define TOGGLE_MEANDRE_VOUT 6 // switch output sine voltage between 3.3v (default) and 5v 
 #define FSYNC_PIN  10
 
 // LCD Settings
@@ -259,13 +259,13 @@ struct settings_t {
   unsigned long frequency[2]; 
   sigmode_t currentMode[2]; // uint8_t type
   bool currentChannel;      // current FREQ register/Channel#0; FALSE for Ch#0, TRUE for Ch#1
-  bool toggleCLKoutVolt;    // 3.3v CLK signal by default
+  bool toggleMeandreOutVoltage;  // 3.3v CLK signal by default
   uint8_t displayFrequencyMode;  // 4 ways to display frequency value: with/without leading zeros, with/without separation delimiter 
   uint8_t checkSum;
 #ifdef ENABLE_EEPROM
   } settings;
 #else
-  } settings = { 1000UL, 1000UL, SIGMODE_SINE, SIGMODE_SINE, false, false, NO_LEAD_ZERO_and_DELIMITER, 0 }; // dafault values
+  } settings = { 1000UL, 1000UL, SIGMODE_SINE, SIGMODE_MEANDRE, false, false, NO_LEAD_ZERO_and_DELIMITER, 0 }; // dafault values
 #endif
 
 
@@ -372,7 +372,7 @@ void setup() {
   lcd.backlight();
   lcd.print(F("Signal Generator"));
   lcd.setCursor(0, 1);
-  lcd.print(F("-ShaggyDog 2020-"));
+  lcd.print(F("-ShaggyDog 2021-"));
   _delay_ms(1500);
 
   // Initite AD9833 Module
@@ -380,9 +380,7 @@ void setup() {
 
 #ifdef ENABLE_EEPROM
   bool resetSettings = false;
-  if( readSettingsFromEEPROM() ) {
-    applyCurrentSettings();// set settings to the AD module that were read from EEPROM
-  } else {
+  if( ! readSettingsFromEEPROM() ) {
     lcd.setCursor(0, 0);
     lcd.print(F("Error:CRC EEPROM"));
     lcdPrintResetMsg( 1 );  // print Reset message in line # 1
@@ -394,26 +392,27 @@ void setup() {
   if( !digitalRead( BUTTON_OK ) || resetSettings ) { // if button is pressed at start up then all settings are reset to defaul
     lcdPrintResetMsg( 0 ); // print Reset message in line # 0
     settings.frequency[0] = settings.frequency[1] = 1000UL;
-    settings.currentMode[0] = settings.currentMode[1] = SIGMODE_SINE;
-    settings.toggleCLKoutVolt = false;
-    settings.currentChannel = false; 
+    settings.currentMode[0] = SIGMODE_SINE;
+    settings.currentMode[1] = SIGMODE_MEANDRE;
+    settings.toggleMeandreOutVoltage = false;
+    settings.currentChannel = false;   // means CH#0; true means CH#1
     settings.displayFrequencyMode = NO_LEAD_ZERO_and_DELIMITER;
     blinkDisplayBacklight(3);
-    applyCurrentSettings();
     while( !digitalRead( BUTTON_OK ) ) ; // wait for button to be released
-    lcd.clear();
   }
   if( resetSettings ) writeSettingsToEEPROM();
+
+  applyCurrentSettings();  // set settings to the AD module that were read from EEPROM
 #endif
-  
+
   // Set encoder pins as interrupts
   attachInterrupt( digitalPinToInterrupt(DT),  encoderTickISR, CHANGE );
   attachInterrupt( digitalPinToInterrupt(CLK), encoderTickISR, CHANGE );
 
   #ifdef ENABLE_VOUT_SWITCH
     // init pins and set them to default state 
-    pinMode( TOGGLE_CLK_VOUT, OUTPUT );
-    toggleCLKvolt( settings.toggleCLKoutVolt );  // 3.3v by default (LOW signal output)
+    pinMode( TOGGLE_MEANDRE_VOUT, OUTPUT );
+    toggleMeandreVoltage( settings.toggleMeandreOutVoltage );  // 3.3v by default (LOW signal output)
     
     pinMode( TOGGLE_OUT, OUTPUT );  // decrease amplitude of CLK signal to 650 mV by toggling an output divider (under development)
     toggleOut( settings.currentMode[(uint8_t)settings.currentChannel] );     // under development
@@ -475,7 +474,7 @@ void loop() {
     #endif
     
     #ifdef ENABLE_VOUT_SWITCH
-      displayCLKoutVolt( settings.toggleCLKoutVolt, settings.currentMode[(uint8_t)settings.currentChannel] );
+      displayMeandreOutVolt( settings.toggleMeandreOutVoltage, settings.currentMode[(uint8_t)settings.currentChannel] );
     #endif
     
     displaySignalMode( settings.currentMode[(uint8_t)settings.currentChannel] );
@@ -554,8 +553,8 @@ void processSingleClick(void) {
 
 #ifdef ENABLE_VOUT_SWITCH
           case IP_VOUT_SWITCH: // switch meandre out voltage 5v vs. 3v
-            settings.toggleCLKoutVolt = ! settings.toggleCLKoutVolt;  // flip bool value
-            toggleCLKvolt( settings.toggleCLKoutVolt );
+            settings.toggleMeandreOutVoltage = ! settings.toggleMeandreOutVoltage;  // flip bool value
+            toggleMeandreVoltage( settings.toggleMeandreOutVoltage );
             break;
 #endif            
           case IP_SIGNAL_MODE: // Change the signal mode (sine/triangle/clock)
@@ -954,7 +953,7 @@ void displayCurrentChannel( const bool _channel ) {
 //---------------------
 
 
-void displayCLKoutVolt( const bool _toggleCLKoutVolt, const sigmode_t _currentMode ) {
+void displayMeandreOutVolt( const bool _toggleMeandreOutVoltage, const sigmode_t _currentMode ) {
   lcd.setCursor(6, 1);
 #ifdef ENABLE_MEANDRE05F_SIGMODE
   if( _currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F ) {
@@ -962,16 +961,16 @@ void displayCLKoutVolt( const bool _toggleCLKoutVolt, const sigmode_t _currentMo
   if( _currentMode == SIGMODE_MEANDRE ) {
 #endif
     lcd.write( 1 );  // meandre sign
-    lcd.print( _toggleCLKoutVolt ? F("5.0v") : F("3.3v") );
+    lcd.print( _toggleMeandreOutVoltage ? F("5.0v") : F("3.3v") );
   } else {
     lcd.print( F("     ") ); // 5 x spaces
   }
-} // displayCLKoutVolt()
+} // displayMeandreOutVolt()
 //---------------------
 
   
-void toggleCLKvolt( const bool _toggleOutVolt ) {
- digitalWrite( TOGGLE_CLK_VOUT, _toggleOutVolt ? HIGH : LOW ); // HIGH = 5v, 3.3v
+void toggleMeandreVoltage( const bool _toggleOutVolt ) {
+ digitalWrite( TOGGLE_MEANDRE_VOUT, _toggleOutVolt ? HIGH : LOW ); // HIGH = 5v, 3.3v
 }
 //---------------------
 
