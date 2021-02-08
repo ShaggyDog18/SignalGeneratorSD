@@ -365,7 +365,7 @@ void setup() {
   buttonOK.attachClick( processSingleClick ); // single click
   buttonOK.attachLongPressStart( processLongPress );   // long press
   buttonOK.attachDoubleClick( processDoubleClick ); // double click
-  buttonOK.attachMultiClick( processTripleClick ); // tripple click
+  buttonOK.attachMultiClick( processTripleClick ); // triple click
 
   // Launch Screen
   lcd.home();
@@ -1077,9 +1077,8 @@ unsigned char crc8block(unsigned char *pcBlock, uint16_t len) {
     }
     return crc;
 }
+//--------------------
 
-
-// under development
 void toggleOut( const sigmode_t _currentMode ) {
 #ifdef ENABLE_MEANDRE05F_SIGMODE
   digitalWrite( TOGGLE_OUT, (_currentMode == SIGMODE_MEANDRE || _currentMode == SIGMODE_MEANDRE05F) ? HIGH : LOW );
