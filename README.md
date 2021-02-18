@@ -30,8 +30,8 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
-  - **NEW** "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
-- **NEW** - `Stepped Sweep Generator`: the frequency is varied in a range defined by values set in Ch#0 (start of the range) and Ch#1 (end of the range) with signal settings of Ch#0 and discrete steps of 0,1 of a current running frequency (kind of logarithmic steps).
+  - "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
+- `Stepped Sweep Generator`- the frequency is varied in a range defined by values set in Ch#0 (start of the range) and Ch#1 (end of the range) with signal settings of Ch#0 and discrete steps of 0,1 of a current running frequency (kind of logarithmic steps).
 Frequency value steps either up or down from the start of the range depends on what channels' frequency is larger. Frequency is changed discretely every 250 mSec (can be changed at compilation). 
 The running `Stepped Sweep Generator` cycle is indicated by a blinking cursor at the end of a frequency value. Can be activated for Ch#0 only and uses its signal settings. 
 While running, can be cancelled by short press and hold of OK button. When the end of the range is reached, it pauses for 3 sec and switches back to Ch#0 settings. 
@@ -63,7 +63,7 @@ You may pick up a pre-compiled firmware HEX file that includes all the below adv
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup.
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
 - `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
-- **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency.
+- `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency.
 - `#define ENABLE_VOUT_SWITCH` - (disabled by default) developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
@@ -82,14 +82,14 @@ You may pick up a pre-compiled firmware HEX file that includes all the below adv
   - Long press -> exit Frequncy Input Mode to Settings Mode.
   - Encoder rotation -> change value of the current digit of the frequency value (digit is ighlighted by a blinking cursor) OR change an input digit postion (flat cursor). (depends of the frequency input mode).
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position.
-  - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
+  - "Running" frequency -> the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
 - Settings Mode:
   - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
   - Single click at active input parameter -> change parameter's value. The new value is immediately applied (except Frequeency Input mode).
   - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
   - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
 The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
-- **NEW** `Stepped Sweep Generator` feature:
+- `Stepped Sweep Generator` feature:
   - Double click in SETTING_MODE while in channel Ch#0 position -> initiate the `Stepped Sweep Generator` feature; runs one cycle of a frequency variation.
   - Single click or click and hold -> cancel a `Stepped Sweep Generator` sweep cycle.  
 
