@@ -18,7 +18,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 - Use **MD_AD9833**(modified) library to control the AD9833 Module: compact and bug-free library with great functions.
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
-- Improved navigation, essentially, coded from scratch (see Navigation section below).
+- Improved navigation, essentially, coded from scratch (refer to **Improved Navigation** section below).
 - Improved the way frequency value is displayed (coded from scratch): 
   - option to hide leading zeros in frequency value (toggled by triple click of encoder button).
   - option to delimit thousands by a separation sign (toggled by triple click to encoder button). 
@@ -58,34 +58,35 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
+You may pick up a pre-compiled firmware HEX file that includes all the below advanced options (except ENABLE_VOUT_SWITCH and USE_PHASE which are disabled).
 - `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented.
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup.
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-- `#define NEW_WAY_INPUT_FREQ` - new faster and more convenient  way of input frequency by encoder; if you like the old way - comment it!
-- **NEW** `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
+- `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
 - **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency.
-- `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
-- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
-- `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
+- `#define ENABLE_VOUT_SWITCH` - (disabled by default) developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
 - **NEW** `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out. 
+- `#define SWAP_ENCODER_DIRECTION` - (disabled by default) swap encoder pins if encoder is detecting rotation incorrectly.
+- `#define USE_PHASE` - (disabled by default) use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 
 ## Improved Navigation:
 
-- default Operation Screen:
-  - Single button click -> go to SETTING_MODE.
+- Default Operation Screen:
+  - Single button click -> go to Settings Mode.
   - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
-- Input frequency value:
-  - Single click -> jump to the left to more significant number.
-  - Double click -> jump to the right to less significant number.
-  - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
-  - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
+- Frequency Input Mode:
+  - Single click -> change frequency inout mode: input digit value by encoder or change digit position.
+  - Long press -> exit Frequncy Input Mode to Settings Mode.
+  - Encoder rotation -> change value of the current digit of the frequency value (digit is underlined by a blinking cursor) OR change an input digit postion (flat cursor). (depends of the frequency inout mode).
+  - Fast encoder rotation -> change value of more significant digit rather than the current digit position.
   - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
-- Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
-- Single click at active input parameter -> change parameter's value. The new value is immediately applied.
-- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
-- Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
+- Settings Mode:
+  - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
+  - Single click at active input parameter -> change parameter's value. The new value is immediately applied (except Frequeency Input mode).
+  - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
+  - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
 The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
 - **NEW** `Stepped Sweep Generator` feature:
   - Double click in SETTING_MODE while in channel Ch#0 position -> initiate the `Stepped Sweep Generator` feature; runs one cycle of a frequency variation.

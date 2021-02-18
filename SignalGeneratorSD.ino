@@ -19,7 +19,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 
 - Use **MD_AD9833**(modified) library to control the AD9833 Module: compact and bug-free library with great functions.
 - Improved, simplified, optimized, fixed bugs, used better/"standard" libraries for all components: the display, rotary encoder, button.
-- Improved navigation, essentially, coded from scratch (see Navigation section below).
+- Improved navigation, essentially, coded from scratch (refer to **Improved Navigation** section below).
 - Improved the way frequency value is displayed (coded from scratch): 
   - option to hide leading zeros in frequency value (toggled by triple click of encoder button).
   - option to delimit thousands by a separation sign (toggled by triple click to encoder button). 
@@ -28,7 +28,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Added graphic icons for signal form representation on the display (if you still like the old way, comment `#define GRAPH_ICONS`). 
 - Tied a signal mode to a Channel; so, now you may change signal form along with its frequency by selecting a channel.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module. Comment `#define ENABLE_MEANDRE05F_SIGMODE` if you do not need it.
-- More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
+- More convenient and fast way of input frequency value by rotary encoder: 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   - **NEW** "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
@@ -59,34 +59,35 @@ Download and install all below libraries as regular libraries in your Arduino ID
 
 ## Compile Options/Firmware Configuration:
 
+You may pick up a pre-compiled firmware HEX file that includes all the below advanced options (except ENABLE_VOUT_SWITCH and USE_PHASE which are disabled).
 - `#define GRAPH_ICONS` - use graphic icons for signal representation on the display; Still, the original text labels can be used if commented.
 - `#define ENABLE_EEPROM`- save settings to EEPROM, recover them at startup.
 - `#define ENABLE_MEANDRE05F_SIGMODE` - extra signal mode: squarewave signal at 0.5 frequency. This is one of the AD9833 module's features, used for more precise frequency setting. 
-- `#define NEW_WAY_INPUT_FREQ` - new faster and more convenient  way of input frequency by encoder; if you like the old way - comment it!
-- **NEW** `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
+- `#define RUNNING_FREQUENCY` - the value of frequency is applied "on the fly" with a small 0.5 sec delay so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
 - **NEW** `#define STEPPED_SWEEP_GENERATOR` - the value of frequency is varied in a range defined by frequency values set in Ch#0 and Ch#1 with signal settings of Ch#0 and a discrete step of 0,1 of a current frequency.
-- `#define SWAP_ENCODER_DIRECTION` - swap encoder pins if encoder is detecting rotation incorrectly.
-- `#define ENABLE_VOUT_SWITCH` - developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
-- `#define USE_PHASE` - use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
+- `#define ENABLE_VOUT_SWITCH` - (disabled by default) developed an extra output circuit that switch meander logic level to either 3.3v or 5v. Switched from menu by pin 6. See explanation and EasyEDA link below in the **Squarewave Signal Amplitude Feature** chapter below. 
 - `#define LCD_I2C_ADDRESS 0x3f` - may need to change I2C address of the display module.
 - `#define EEPROM_ADDRESS_SHIFT` - start address in EEPROM to store settings; if EEPROM resource is vanished and you start getting `"EEPROM CRC Error"` at launch, change the settings block start address shifting it to the other unused EEPROM area. The entire settings block takes 14 bytes only.
-- **NEW**`#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out.
+- **NEW** `#define ENABLE_WATCHDOG` - use WatchDog timer to prevent firmware from hanging out. 
+- `#define SWAP_ENCODER_DIRECTION` - (disabled by default) swap encoder pins if encoder is detecting rotation incorrectly.
+- `#define USE_PHASE` - (disabled by default) use Phase instead of the FREQ register; never used nor tested :-) Sorry, no guarantee it works...
 
 ## Improved Navigation:
 
-- default Operation Screen:
-  - Single button click -> go to SETTING_MODE.
+- Default Operation Screen:
+  - Single button click -> go to Settings Mode.
   - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
-- Input frequency value:
-  - Single click -> jump to the left to more significant number.
-  - Double click -> jump to the right to less significant number.
-  - Encoder rotation -> change value of the current digit (underlined by a cursor) of the frequency value.
-  - Fast encoder rotation -> change value of more significant digit rather than the current digit position (if `NEW_WAY_INPUT_FREQ` is defined).
+- Frequency Input Mode:
+  - Single click -> change frequency inout mode: input digit value by encoder or change digit position.
+  - Long press -> exit Frequncy Input Mode to Settings Mode.
+  - Encoder rotation -> change value of the current digit of the frequency value (digit is underlined by a blinking cursor) OR change an input digit postion (flat cursor). (depends of the frequency inout mode).
+  - Fast encoder rotation -> change value of more significant digit rather than the current digit position.
   - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
-- Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
-- Single click at active input parameter -> change parameter's value. The new value is immediately applied.
-- Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
-- Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
+- Settings Mode:
+  - Encoder rotation any direction -> switch from one input parameter to another in a loop; a current input parament is highlighted by underline cursor.
+  - Single click at active input parameter -> change parameter's value. The new value is immediately applied (except Frequeency Input mode).
+  - Long button press anywhere in settings mode -> save and apply the current value of a parameter and jump to Operation Screen (blinking cursor at the "f=" letter).
+  - Triple click anywhere -> change the way the frequency value is displayed: with/without leading zeros; with/without thousands separation sign. All four possible combinations are toggled in a loop. Default set: no leading zeros with a separation apostrophe. 
 The thousands delimiter is different from country to country. In the United States, this character is a comma (,) in Germany, a period (.), in Sweden, a space. So, you may re-define `DELIMITER` sign to one you аrе accustomed to: comma, period, space, astrisk, etc... Just search for `DELIMITER` definition.
 - **NEW** `Stepped Sweep Generator` feature:
   - Double click in SETTING_MODE while in channel Ch#0 position -> initiate the `Stepped Sweep Generator` feature; runs one cycle of a frequency variation.
@@ -131,11 +132,10 @@ Inhale a new life into your Signal Generator! Enjoy!
 #define GRAPH_ICONS     // use graphical icons for sign representation on display
 #define ENABLE_EEPROM   // sacve settings to EEPROM, recover them at startup
 #define ENABLE_MEANDRE05F_SIGMODE   // compatible with the new MD_AD9833 library only; if you do not need it - comment!
-#define NEW_WAY_INPUT_FREQ  // input frequency with jumping to the next digit position; Fast rotation adds 10 times more
 #define RUNNING_FREQUENCY   // The value of frequency is applied "on the fly" with a small 0.4 sec delay. The new frequency value is applied in 0.4 sec after your input is complete.
 //#define ENABLE_VOUT_SWITCH  // developped an extra output circuit that switch meander logic level of eather 3.3v or 5v; switched from menu by pin 6
 #define EEPROM_ADDRESS_SHIFT 0x00 // start address in EEPROM to store settings; if EEPROM is vanished and you start getting "EEPROM CRC Error" at launch, change the start address to shift to the other unused EEPROM area
-#define STEPPED_SWEEP_GENERATOR  // veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
+#define STEPPED_SWEEP_GENERATOR  // NEW feature: veries frequency in a range defined by frequency values set in Ch#0 and Ch#1 with a signal settings of Ch#0 and a discrete step of 0,1 of a current frequency. RUNNING_FREQUENCY should be defined.
 #define ENABLE_WATCHDOG          // size encresed to 11092/452 vs 11038/452 bytes
 //#define SWAP_ENCODER_DIRECTION  // swap if encoder is rotating in the wrong direction
 //#define USE_PHASE    //Uncomment if you want to change the Phase instead of the FREQ register // never use nor tested
@@ -145,9 +145,6 @@ Inhale a new life into your Signal Generator! Enjoy!
 //Check up and correct Compiler Configuration
 #if defined( STEPPED_SWEEP_GENERATOR ) && !defined( RUNNING_FREQUENCY )
   #define RUNNING_FREQUENCY
-#endif
-#if defined( RUNNING_FREQUENCY ) && !defined( NEW_WAY_INPUT_FREQ )
-  #define NEW_WAY_INPUT_FREQ  // Runing frequency works in the NEW_WAY_INPUT_FREQ only!
 #endif
 
 //-------------------------
@@ -268,7 +265,6 @@ struct settings_t {
   } settings = { 1000UL, 1000UL, SIGMODE_SINE, SIGMODE_MEANDRE, false, false, NO_LEAD_ZERO_and_DELIMITER, 0 }; // dafault values
 #endif
 
-
 int8_t digitPos = 0;  // current input position for frequency value
 const unsigned long maxFrequency = 12500000UL; // according to AS9833 Datasheet the max frequency is 12.5 MHz
 #ifdef USE_PHASE
@@ -277,12 +273,15 @@ uint16_t phase = 0;
 #endif
 
 // flags
+struct flags_t{
 bool defaultScreenUpdateFlag = true;
 bool updateDisplayFlag = true;
 bool signalOn = true;
+bool frequencySettingMode = true; // encoder change: false->value of a digit; true->position of a digit
 #ifdef RUNNING_FREQUENCY 
   bool frequencyUpdatedFlag = false;
 #endif
+} flags;
 
 // Variables used to temporary store frequency value
 unsigned long frequency;
@@ -334,7 +333,6 @@ const uint8_t triangle[2][8] = {
 // use a standard '/' char
 0b10000,0b01000,0b00100,0b00010,0b00001,0b00000,0b00000,0b00000 }; //'\'
 #endif
-
 
 //---------------------
 //   setup()
@@ -452,19 +450,19 @@ void loop() {
   processEncoder( encoder.getDirection() );  
 
   #ifdef RUNNING_FREQUENCY 
-    if( frequencyUpdatedFlag ) {  // frequency value was changed
+    if( flags.frequencyUpdatedFlag ) {  // frequency value was changed
       if( millis() - lastFrequencyUpdate > frequencyUpdateApplyDelay ) {  // apply new frequency value after a delay
         settings.frequency[(uint8_t)settings.currentChannel] = frequency;
         setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-        frequencyUpdatedFlag = false;
+        flags.frequencyUpdatedFlag = false;
       }
     }  
   #endif
 
-  if( updateDisplayFlag ) {   // Update display if needed
+  if( flags.updateDisplayFlag ) {   // Update display if needed
   // Display: 1st line
     displayFrequency( frequency );  
-    displaySignalONOFF( signalOn );
+    displaySignalONOFF( flags.signalOn );
 
   // Display: 2nd line
     #ifdef USE_PHASE
@@ -480,7 +478,7 @@ void loop() {
     displaySignalMode( settings.currentMode[(uint8_t)settings.currentChannel] );
     
     setCursor2inputPosition( cursorInputPos );
-    updateDisplayFlag = false;
+    flags.updateDisplayFlag = false;
   }
   
   cursorPositionPostProcessing();  // set cursor to the right position after display update
@@ -495,11 +493,11 @@ void loop() {
 void cursorPositionPostProcessing(void) { // set cursor to the right position after display update
   switch( menuState ) {
     case DEFAULT_SCREEN:     // Default state
-      if( defaultScreenUpdateFlag ) {
+      if( flags.defaultScreenUpdateFlag ) {
         lcd.setCursor(0, 0);
         lcd.noCursor();
         lcd.blink();
-        defaultScreenUpdateFlag = false;
+        flags.defaultScreenUpdateFlag = false;
       }
       break;
 
@@ -539,8 +537,8 @@ void processSingleClick(void) {
              break;
              
           case IP_ONOFF: // switch an output generator signal on / off
-            signalOn = ! signalOn;
-            sigGen.setModeSD(signalOn ? MD_AD9833::MODE_ON : MD_AD9833::MODE_OFF); 
+            flags.signalOn = ! flags.signalOn;
+            sigGen.setModeSD(flags.signalOn ? MD_AD9833::MODE_ON : MD_AD9833::MODE_OFF); 
             break;
             
 #ifndef USE_PHASE          // If USE_PHASE has not been set
@@ -568,21 +566,15 @@ void processSingleClick(void) {
             setADsignalMode( settings.currentMode[(uint8_t)settings.currentChannel] );
             break;
       } // switch( cursorInputPos )
-      updateDisplayFlag = true;
+      flags.updateDisplayFlag = true;
       break;
-             
-    case FREQUENCY_SETTING:  
-      // Each button press will either enable to change the value of another digit
-      // or if all digits have been changed, to apply the setting
-      if( digitPos < FREQ_N_DIGITS-1 ) {
-        digitPos++;
-      } else {
-        digitPos = 0;
-        #ifndef RUNNING_FREQUENCY 
-          setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
-        #endif
-        jump2settingMenu();
-      }        
+
+    case FREQUENCY_SETTING:  // swap between two frequency input modes: change a selected digit value -> change a digit position
+      flags.frequencySettingMode = !flags.frequencySettingMode;
+      if( flags.frequencySettingMode )
+        lcd.noBlink();  // change a digit position
+      else
+        lcd.blink();  // change a digit value
       break;
         
 #ifdef  USE_PHASE // never tested
@@ -606,7 +598,7 @@ void processLongPress(void) {
   case SETTING_MENU:
     menuState = DEFAULT_SCREEN;
     cursorInputPos = IP_FREQUENCY;
-    defaultScreenUpdateFlag = true;
+    flags.defaultScreenUpdateFlag = true;
     break;
 
 #ifdef  USE_PHASE // never tested
@@ -621,6 +613,7 @@ void processLongPress(void) {
     #ifndef RUNNING_FREQUENCY 
       setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
     #endif
+    flags.frequencySettingMode = true; // default value:change position of the digit
     jump2settingMenu();
     break;
   } // switch( menuState )
@@ -630,10 +623,6 @@ void processLongPress(void) {
 
 void processDoubleClick(void) {
   switch( menuState ) {
-  case FREQUENCY_SETTING: 
-    if( digitPos > 0 ) digitPos--;
-    break;
-
 #ifdef STEPPED_SWEEP_GENERATOR
   case SETTING_MENU:
     if( cursorInputPos == IP_CHANNEL && !settings.currentChannel ) { // for Ch#0 only;
@@ -657,7 +646,7 @@ void processTripleClick(void) {
   settings.displayFrequencyMode %= NUMBER_FREQUENCY_DISPLAY_MODES;  // same as below 2 lines
   //if( settings.displayFrequencyMode == NUMBER_FREQUENCY_DISPLAY_MODES ) 
   //  settings.displayFrequencyMode = 0;  // LEAD_ZERO_and_NO_DELIMITER
-  updateDisplayFlag = true;
+  flags.updateDisplayFlag = true;
   lcd.clear();
 }  // processTripleClick()
 //---------------------
@@ -703,40 +692,25 @@ void processEncoder( const RotaryEncoder::Direction _rotaryDirection ) {
           break;
 
       case FREQUENCY_SETTING:
-        #ifdef NEW_WAY_INPUT_FREQ
-          if( _rotaryDirection == RotaryEncoder::Direction::FAST_CW )
-            frequency += power(10, digitPos+1);
-          else  // slow encoder rotation
-            frequency += power(10, digitPos);
+          // false: encoder change value of a digit; true: encoder change a digit position
+          if( flags.frequencySettingMode ) { // change a digit position (--)
+            if( digitPos > 0 ) digitPos--;
+          } else {  // change a digit value
+            if( _rotaryDirection == RotaryEncoder::Direction::FAST_CW )
+              frequency += power(10, digitPos+1);
+            else  // slow encoder rotation
+              frequency += power(10, digitPos);
            
-          if( frequency > maxFrequency ) frequency = maxFrequency;
-          #ifdef RUNNING_FREQUENCY
-            lastFrequencyUpdate = millis();
-            frequencyUpdatedFlag = true;
-          #else
-            settings.frequency[(uint8_t)settings.currentChannel] = frequency;
-          #endif
-          updateDisplayFlag = true;
-          break;
-          
-        #else // old way of input frequency
-        {
-          // Here we initialise two variables.
-          // newFrequency is the value of the frequency after we increment it
-          // dispDigit is the digit that we are currently modifing, and we obtain it
-          // by a neat little trick, using operator % in conjunction with division
-          // We then compare these variables with the maximum value for our
-          // frequency, if all is good, make the change        
-          unsigned long newFrequency = frequency + power(10, digitPos);
-          unsigned char dispDigit = frequency % power(10, digitPos + 1) / power(10, digitPos);
-          if (newFrequency <= maxFrequency && dispDigit < FREQ_N_DIGITS+1) {
-            frequency += power(10, digitPos);
-            settings.frequency[(uint8_t)settings.currentChannel] = frequency;
-            updateDisplayFlag = true;
+            if( frequency > maxFrequency ) frequency = maxFrequency;
+            #ifdef RUNNING_FREQUENCY
+              lastFrequencyUpdate = millis();
+              flags.frequencyUpdatedFlag = true;
+            #else
+              settings.frequency[(uint8_t)settings.currentChannel] = frequency;
+            #endif
+            flags.updateDisplayFlag = true;
           }
-        } break; 
-        #endif
-
+          break;
         
 #ifdef USE_PHASE
       case PHASE_SETTING: {
@@ -746,7 +720,7 @@ void processEncoder( const RotaryEncoder::Direction _rotaryDirection ) {
           unsigned char dispDigit = phase % power(10, digitPos + 1) / power(10, digitPos);
           if( newPhase < maxPhase && dispDigit < PHASE_N_DIGITS+1 ) {
             phase += power(10, digitPos);
-            updateDisplayFlag = true;
+            flags.updateDisplayFlag = true;
           }
         } break;
 #endif        
@@ -774,38 +748,38 @@ void processEncoder( const RotaryEncoder::Direction _rotaryDirection ) {
           break;
 
       case FREQUENCY_SETTING:
-        #ifdef NEW_WAY_INPUT_FREQ
-          if( _rotaryDirection == RotaryEncoder::Direction::FAST_CCW ) {
-            if( frequency > power(10, digitPos+1) ) 
-              frequency -= power(10, digitPos+1);
-            else 
-              break;  
-          } else {    // slow encoder rotation
-            if( frequency > power(10, digitPos) ) 
-              frequency -= power(10, digitPos);
-            else 
-              break;
+          // false: encoder change value of a digit; true: encoder change a digit position
+          if( flags.frequencySettingMode ) { // change a digit position (++)
+            if( digitPos < FREQ_N_DIGITS-1 ) {
+              digitPos++;
+            } else {  // exit frequency Input mode -> jump to Settings Menu 
+              digitPos = 0;
+              #ifndef RUNNING_FREQUENCY 
+                setADfrequency( settings.currentChannel, settings.frequency[(uint8_t)settings.currentChannel] );
+              #endif
+              jump2settingMenu();
+            }            
+          } else {  // change a digit value
+            if( _rotaryDirection == RotaryEncoder::Direction::FAST_CCW ) {
+              if( frequency > power(10, digitPos+1) ) 
+                frequency -= power(10, digitPos+1);
+              else 
+                break;  
+            } else {    // slow encoder rotation
+              if( frequency > power(10, digitPos) ) 
+                frequency -= power(10, digitPos);
+              else 
+                break;
+            }
+            #ifdef RUNNING_FREQUENCY
+              lastFrequencyUpdate = millis();
+              flags.frequencyUpdatedFlag = true;
+            #else
+              settings.frequency[(uint8_t)settings.currentChannel] = frequency;
+            #endif
+            flags.updateDisplayFlag = true;
           }
-          #ifdef RUNNING_FREQUENCY
-            lastFrequencyUpdate = millis();
-            frequencyUpdatedFlag = true;
-          #else
-            settings.frequency[(uint8_t)settings.currentChannel] = frequency;
-          #endif
-          updateDisplayFlag = true;
           break;
-          
-        #else // old way of input frequency
-        {
-          unsigned long newFrequency = frequency + power(10, digitPos);
-          unsigned char dispDigit = frequency % power(10, digitPos + 1) / power(10, digitPos);
-          if (newFrequency > 0 && dispDigit > 0) {
-            frequency -= power(10, digitPos);
-            settings.frequency[(uint8_t)settings.currentChannel] = frequency;
-            updateDisplayFlag = true;
-          }         
-        } break; 
-        #endif
      
 #ifdef USE_PHASE
       case PHASE_SETTING: {
@@ -815,7 +789,7 @@ void processEncoder( const RotaryEncoder::Direction _rotaryDirection ) {
           unsigned char dispDigit = phase % power(10, digitPos + 1) / power(10, digitPos);
           if(newPhase > 0 && dispDigit > 0) {
             phase -= power(10, digitPos);
-            updateDisplayFlag = true;
+            flags.updateDisplayFlag = true;
           }
         } break;
 #endif        
@@ -1121,8 +1095,8 @@ void steppedSweepGenerator( void ) {  // for Ch#0 only; uses Ch#0 signal setting
       Watchdog.reset(); // while() is performing OK
     #endif 
   }
-  frequencyUpdatedFlag = true;  // get back fo Ch#0 settings
-  updateDisplayFlag = true;  // update the display
+  flags.frequencyUpdatedFlag = true;  // get back fo Ch#0 settings
+  flags.updateDisplayFlag = true;  // update the display
   #ifdef ENABLE_WATCHDOG
     Watchdog.disable();
   #endif
