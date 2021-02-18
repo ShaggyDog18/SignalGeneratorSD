@@ -76,6 +76,7 @@ You may pick up a pre-compiled firmware HEX file that includes all the below adv
 - Default Operation Screen:
   - Single button click -> go to Settings Mode.
   - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
+  - Encoder rotation -> enter Settings Mode.
 - Frequency Input Mode:
   - Single click -> change frequency input mode: input a digit value or change a digit position.
   - Long press -> exit Frequncy Input Mode to Settings Mode.
