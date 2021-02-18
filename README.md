@@ -77,9 +77,9 @@ You may pick up a pre-compiled firmware HEX file that includes all the below adv
   - Single button click -> go to Settings Mode.
   - Double click -> save settings to EEPROM (in case EEPROM is enabled). Display backlight will blink 2 times to confirm the operation.
 - Frequency Input Mode:
-  - Single click -> change frequency inout mode: input digit value by encoder or change digit position.
+  - Single click -> change frequency input mode: input a digit value or change a digit position.
   - Long press -> exit Frequncy Input Mode to Settings Mode.
-  - Encoder rotation -> change value of the current digit of the frequency value (digit is underlined by a blinking cursor) OR change an input digit postion (flat cursor). (depends of the frequency inout mode).
+  - Encoder rotation -> change value of the current digit of the frequency value (digit is ighlighted by a blinking cursor) OR change an input digit postion (flat cursor). (depends of the frequency input mode).
   - Fast encoder rotation -> change value of more significant digit rather than the current digit position.
   - **NEW** "running" frequency  ->  the value of frequency  is applied "on the fly" with a small 0.5 sec delay; keep adjusting the frequency by encoder and the set value is applied in 0.5 sec after your've stopped rotating encoder, so the input is completet.
 - Settings Mode:
