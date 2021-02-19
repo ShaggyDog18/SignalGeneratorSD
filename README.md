@@ -27,7 +27,7 @@ https://www.youtube.com/watch?v=Y1KE8eAC9Bk
 - Added graphic icons for signal form representation on the display (if you still like the old way, comment `#define GRAPH_ICONS`). 
 - Tied a signal mode to a Channel; so, now you may change signal form along with its frequency by selecting a channel.
 - Added a new signal mode: square/meander signal wave at 1/2 frequency (for more accuracy of the output signal frequency). This is a standard feature of AD9833 module. Comment `#define ENABLE_MEANDRE05F_SIGMODE` if you do not need it.
-- More convenient and fast way of input frequency value by rotary encoder (if you still like the old way, comment `#define NEW_WAY_INPUT_FREQ`): 
+- More convenient and fast way of input frequency value by rotary encoder: 
   - continuous input: if reach either '9' or '0' in a digit position, then it jumps over to the senior digit and decreases/increases it.
   - fast input: if fast encoder rotation is detected, then it increases/decreases ten times of a current digit position
   - "Running" frequency - the value of frequency is applied "on a fly" with a small 0.5 sec delay, so that you keep adjusting the frequency by encoder and the value is applied in 0.5 sec after your input is complete.
