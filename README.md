@@ -55,6 +55,7 @@ Download and install all below libraries as regular libraries in your Arduino ID
 - **RotaryEncoder** (modified): https://github.com/ShaggyDog18/RotaryEncoder
 - **OneButton**: https://github.com/ShaggyDog18/OneButton 
 - **LCD1602 I2C**: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
+- **WatchDog**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverWDT
 
 ## Compile Options/Firmware Configuration:
 
