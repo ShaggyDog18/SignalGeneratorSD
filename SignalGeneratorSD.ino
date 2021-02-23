@@ -388,7 +388,7 @@ void setup() {
     lcd.clear();
   }
 
-  if( !digitalRead( BUTTON_OK ) || resetSettings ) { // if button is pressed at start up then all settings are reset to defaul
+  if( !digitalRead( BUTTON_OK ) || resetSettings ) { // if button is pressed at start up then all settings are reset to default
     lcdPrintResetMsg( 0 ); // print Reset message in line # 0
     settings.frequency[0] = settings.frequency[1] = 1000UL;
     settings.currentMode[0] = SIGMODE_SINE;
