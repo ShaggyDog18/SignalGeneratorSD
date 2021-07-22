@@ -375,7 +375,7 @@ void setup() {
   _delay_ms(1500);
 
   // Initite AD9833 Module
-  sigGen.begin(); // it also set up all default values
+  sigGen.begin(); // it also sets up all default values
 
 #ifdef ENABLE_EEPROM
   bool resetSettings = false;
