@@ -51,11 +51,11 @@ Sweep generators are commonly used to test the frequency response of electronic 
 
 Download and install all below libraries as regular libraries in your Arduino IDE environment (to the `Library` folder):
 
-- **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows right functioning  of ON / OFF functions)
+- **MD_A9833** (modified):  https://github.com/ShaggyDog18/MD_AD9833  (modification allows a right functioning of ON/OFF functions)
 - **RotaryEncoder** (modified): https://github.com/ShaggyDog18/RotaryEncoder
-- **OneButton**: https://github.com/ShaggyDog18/OneButton 
+- **OneButton** (modified): https://github.com/ShaggyDog18/OneButton 
 - **LCD1602 I2C**: https://github.com/fdebrabander/Arduino-LiquidCrystal-I2C-library
-- **WatchDog**: https://github.com/AlexGyver/GyverLibs/tree/master/GyverWDT
+- **WatchDog**: https://github.com/GyverLibs/GyverWDT
 
 ## Compile Options/Firmware Configuration:
 
